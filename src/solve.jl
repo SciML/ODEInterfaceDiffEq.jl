@@ -45,6 +45,8 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm,F}(
     ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.radau,f!,tspan,vec(u),opts)
   elseif typeof(alg) <: radau5
     ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.radau5,f!,tspan,vec(u),opts)
+  elseif typeof(alg) <: rodas
+    ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.rodas,f!,tspan,vec(u),opts)
   end
   if retcode < 0
     if retcode == -1
