@@ -5,10 +5,6 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm,F}(
 
   tspan = [t for t in prob.tspan]
 
-  if tspan[end]-tspan[1]<tType(0)
-    error("final time must be greater than starting time. Aborting.")
-  end
-
   o = KW(kwargs)
 
   u0 = prob.u0
