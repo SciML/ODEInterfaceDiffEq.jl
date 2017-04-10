@@ -1,7 +1,7 @@
-function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm,F}(
-    prob::AbstractODEProblem{uType,tType,isinplace,F},
+function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
+    prob::AbstractODEProblem{uType,tType,isinplace},
     alg::T,timeseries=[],ts=[],ks=[];
-    timeseries_errors = true,kwargs...)
+    timeseries_errors = true,verbose=true,kwargs...)
 
   tspan = [t for t in prob.tspan]
 
@@ -46,14 +46,20 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm,F}(
   end
   if retcode < 0
     if retcode == -1
-      warn("Input is not consistent.")
+      verbose && warn("Input is not consistent.")
+      return_retcode = :Failure
     elseif retcode == -2
-      warn("Interrupted. Larger maxiters is needed.")
+      verbose && warn("Interrupted. Larger maxiters is needed.")
+      return_retcode = :MaxIters
     elseif retcode == -3
-      warn("Step size went too small.")
+      verbose && warn("Step size went too small.")
+      return_retcode = :DtLessThanMin
     elseif retcode == -4
-      warn("Interrupted. Problem is probably stiff.")
+      verbose && warn("Interrupted. Problem is probably stiff.")
+      return_retcode = :Unstable
     end
+  else
+    return_retcode = :Success
   end
 
   if typeof(u0)<:AbstractArray
@@ -67,7 +73,8 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm,F}(
 
 
   build_solution(prob,alg,ts,timeseries,
-                    timeseries_errors = timeseries_errors)
+                    timeseries_errors = timeseries_errors,
+                    retcode = return_retcode)
 end
 
 function buildOptions(o,optionlist,aliases,aliases_reversed)
