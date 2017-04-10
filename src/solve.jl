@@ -1,6 +1,7 @@
 function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     prob::AbstractODEProblem{uType,tType,isinplace},
     alg::T,timeseries=[],ts=[],ks=[];
+    save_start = true,
     timeseries_errors = true,verbose=true,kwargs...)
 
   tspan = [t for t in prob.tspan]
@@ -62,9 +63,16 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     return_retcode = :Success
   end
 
+  if save_start
+    start_idx = 1
+  else
+    start_idx = 2
+    ts = ts[2:end]
+  end
+
   if typeof(u0)<:AbstractArray
     timeseries = Vector{uType}(0)
-    for i=1:size(vectimeseries,1)
+    for i=start_idx:size(vectimeseries,1)
       push!(timeseries,reshape(view(vectimeseries,i,:,)',sizeu))
     end
   else
