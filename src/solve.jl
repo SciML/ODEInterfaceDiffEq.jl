@@ -5,6 +5,10 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     timeseries_errors = true,verbose=true,kwargs...)
 
   tspan = [t for t in prob.tspan]
+    
+  if prob.mass_matrix != I
+    error("This solver is not able to use mass matrices.")
+  end
 
   o = KW(kwargs)
 
