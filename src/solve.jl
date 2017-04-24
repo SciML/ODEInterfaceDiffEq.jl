@@ -4,6 +4,10 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     save_start = true,
     timeseries_errors = true,verbose=true,kwargs...)
 
+  if callback != nothing
+      error("ODEInterface is not compatible with callbacks.")
+  end
+
   tspan = [t for t in prob.tspan]
     
   if prob.mass_matrix != I
