@@ -4,7 +4,7 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     save_start = true,
     timeseries_errors = true,verbose=true,kwargs...)
 
-  if callback != nothing
+  if prob.callback != nothing
       error("ODEInterface is not compatible with callbacks.")
   end
 
