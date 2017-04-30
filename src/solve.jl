@@ -2,9 +2,10 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     prob::AbstractODEProblem{uType,tType,isinplace},
     alg::T,timeseries=[],ts=[],ks=[];
     save_start = true,
-    timeseries_errors = true,verbose=true,kwargs...)
+    timeseries_errors = true,verbose=true,
+    callback=nothing,kwargs...)
 
-  if prob.callback != nothing
+  if prob.callback != nothing || callback != nothing
       error("ODEInterface is not compatible with callbacks.")
   end
 
