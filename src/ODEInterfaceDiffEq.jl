@@ -1,11 +1,11 @@
 __precompile__()
 
 module ODEInterfaceDiffEq
-  using DiffEqBase, ODEInterface
+  using DiffEqBase, ODEInterface, Compat
 
   import DiffEqBase: solve
 
-  typealias KW Dict{Symbol,Any}
+  @compat const KW = Dict{Symbol,Any}
 
   include("algorithms.jl")
   include("solve.jl")
