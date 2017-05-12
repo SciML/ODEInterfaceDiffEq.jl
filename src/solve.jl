@@ -1,12 +1,17 @@
-function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
+function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     prob::AbstractODEProblem{uType,tType,isinplace},
-    alg::T,timeseries=[],ts=[],ks=[];
-    save_start = true,
-    timeseries_errors = true,verbose=true,
+    alg::AlgType,
+    timeseries=[],ts=[],ks=[];
+
+    verbose=true,
+    save_start=true,
+    timeseries_errors=true,
     callback=nothing,kwargs...)
 
+    verbose && !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
+
   if prob.callback != nothing || callback != nothing
-      error("ODEInterface is not compatible with callbacks.")
+    error("ODEInterface is not compatible with callbacks.")
   end
 
   tspan = [t for t in prob.tspan]
@@ -33,7 +38,10 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
   end
 
   o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
-  dict = buildOptions(o,ODEINTERFACE_OPTION_LIST,ODEINTERFACE_ALIASES,ODEINTERFACE_ALIASES_REVERSED)
+    dict = buildOptions(o,
+                        ODEINTERFACE_OPTION_LIST,
+                        ODEINTERFACE_ALIASES,
+                        ODEINTERFACE_ALIASES_REVERSED)
   if prob.mass_matrix != I
     if typeof(prob.mass_matrix) <: Matrix && !(typeof(alg) <: Union{dopri5,dop853,odex})
       dict[:MASSMATRIX] = prob.mass_matrix
@@ -87,7 +95,7 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     ts = ts[2:end]
   end
 
-  if typeof(u0)<:AbstractArray
+  if typeof(u0) <: AbstractArray
     timeseries = Vector{uType}(0)
     for i=start_idx:size(vectimeseries,1)
       push!(timeseries,reshape(view(vectimeseries,i,:,)',sizeu))
@@ -96,10 +104,9 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     timeseries = vec(vectimeseries)
   end
 
-
-  build_solution(prob,alg,ts,timeseries,
-                    timeseries_errors = timeseries_errors,
-                    retcode = return_retcode)
+    build_solution(prob, alg, ts, timeseries,
+                   timeseries_errors = timeseries_errors,
+                   retcode = return_retcode)
 end
 
 function buildOptions(o,optionlist,aliases,aliases_reversed)
@@ -108,34 +115,32 @@ function buildOptions(o,optionlist,aliases,aliases_reversed)
   merge(dict1,dict2)
 end
 
-const ODEINTERFACE_OPTION_LIST = Set([:RTOL,:ATOL,:OUTPUTFCN,:OUTPUTMODE,
-                                :MAXSTEPS,:STEST,:EPS,:RHO,:SSMINSEL,
-                                :SSMAXSEL,:SSBETA,:MAXSS,:INITIALSS,
-                                :MAXEXCOLUMN,:STEPSIZESEQUENCE,:MAXSTABCHECKS,
-                                :MAXSTABCHECKLINE,:DENSEOUTPUTWOEE,:INTERPOLDEGRE,
-                                :SSREDUCTION,:SSSELECTPAR1,:SSSELECTPAR2,
-                                :ORDERDECFRAC,:ORDERINCFRAC,:OPT_RHO,:OPT_RHO2,
-                                :RHSAUTONOMOUS,:M1,:M2,:LAMBDADENSE,:TRANSJTOH,
-                                :STEPSIZESEQUENCE,:JACRECOMPFACTOR,:MASSMATRIX,
-                                :JACOBIMATRIX,:JACOBIBANDSSTRUCT,:WORKFORRHS,
-                                :WORKFORJAC,:WORKFORDEC,:WORKFORSOL,:MAXNEWTONITER,
-                                :NEWTONSTARTZERO,:NEWTONSTOPCRIT,:DIMFIND1VAR,
-                                :MAXSTAGES,:MINSTAGES,:INITSTAGES,:STEPSIZESTRATEGY,
-                                :FREEZESSLEFT,:FREEZESSRIGHT,:ORDERDECFACTOR,
-                                :ORDERINCFACTOR,:ORDERDECCSTEPFAC1,:ORDERDECSTEPFAC2,
-                                :RHS_CALLMODE
-                                ])
+const ODEINTERFACE_OPTION_LIST =
+    Set([:RTOL, :ATOL, :OUTPUTFCN, :OUTPUTMODE, :MAXSTEPS, :STEST, :EPS, :RHO, :SSMINSEL,
+         :SSMAXSEL, :SSBETA, :MAXSS, :INITIALSS, :MAXEXCOLUMN, :STEPSIZESEQUENCE,
+         :MAXSTABCHECKS, :MAXSTABCHECKLINE, :DENSEOUTPUTWOEE, :INTERPOLDEGRE,
+         :SSREDUCTION, :SSSELECTPAR1, :SSSELECTPAR2, :ORDERDECFRAC, :ORDERINCFRAC,
+         :OPT_RHO, :OPT_RHO2, :RHSAUTONOMOUS, :M1, :M2, :LAMBDADENSE, :TRANSJTOH,
+         :STEPSIZESEQUENCE, :JACRECOMPFACTOR, :MASSMATRIX, :JACOBIMATRIX, :JACOBIBANDSSTRUCT,
+         :WORKFORRHS, :WORKFORJAC, :WORKFORDEC, :WORKFORSOL,
+         :MAXNEWTONITER, :NEWTONSTARTZERO, :NEWTONSTOPCRIT, :DIMFIND1VAR,
+         :MAXSTAGES, :MINSTAGES, :INITSTAGES, :STEPSIZESTRATEGY,
+         :FREEZESSLEFT, :FREEZESSRIGHT, :ORDERDECFACTOR,
+         :ORDERINCFACTOR, :ORDERDECCSTEPFAC1, :ORDERDECSTEPFAC2, :RHS_CALLMODE
+         ])
 
-const ODEINTERFACE_ALIASES = Dict{Symbol,Symbol}(:RTOL=>:reltol,
-                                                 :ATOL=>:abstol,
-                                                 :MAXSTEPS=> :maxiters,
-                                                 :MAXSS=>:dtmax,
-                                                 :INITIALSS=>:dt,
-                                                 #:SSMINSEL=>:qmin,
-                                                 :SSBETA=>:beta2,
-                                                 :SSMAXSEL=>:qmax)
+const ODEINTERFACE_ALIASES =
+    Dict{Symbol,Symbol}(:RTOL=>:reltol,
+                        :ATOL=>:abstol,
+                        :MAXSTEPS=> :maxiters,
+                        :MAXSS=>:dtmax,
+                        :INITIALSS=>:dt,
+                        #:SSMINSEL=>:qmin,
+                        :SSBETA=>:beta2,
+                        :SSMAXSEL=>:qmax)
 
-const ODEINTERFACE_ALIASES_REVERSED = Dict{Symbol,Symbol}([(v,k) for (k,v) in ODEINTERFACE_ALIASES])
+const ODEINTERFACE_ALIASES_REVERSED =
+    Dict{Symbol,Symbol}([(v,k) for (k,v) in ODEINTERFACE_ALIASES])
 
 const ODEINTERFACE_STRINGS = Dict{Symbol,String}(
   :LOGIO            => "logio",

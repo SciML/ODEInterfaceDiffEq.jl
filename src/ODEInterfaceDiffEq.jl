@@ -1,16 +1,24 @@
 __precompile__()
 
 module ODEInterfaceDiffEq
-  using DiffEqBase, ODEInterface, Compat
 
-  import DiffEqBase: solve
+using DiffEqBase, ODEInterface, Compat
 
-  @compat const KW = Dict{Symbol,Any}
+import DiffEqBase: solve
 
-  include("algorithms.jl")
-  include("solve.jl")
+const warnkeywords =
+    (:save_idxs, :d_discontinuities, :unstable_check,
+     :calck, :progress, :timeseries_steps, :dense)
 
-  export ODEInterfaceAlgorithm, dopri5, dop853, odex, seulex, radau, radau5, rodas
+function __init__()
+    const global warnlist = Set(warnkeywords)
+end
 
+@compat const KW = Dict{Symbol,Any}
+
+include("algorithms.jl")
+include("solve.jl")
+
+export ODEInterfaceAlgorithm, dopri5, dop853, odex, seulex, radau, radau5, rodas
 
 end # module
