@@ -10,10 +10,6 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
   end
 
   tspan = [t for t in prob.tspan]
-    
-  if prob.mass_matrix != I
-    error("This solver is not able to use mass matrices.")
-  end
 
   o = KW(kwargs)
 
@@ -38,6 +34,18 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
 
   o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
   dict = buildOptions(o,ODEINTERFACE_OPTION_LIST,ODEINTERFACE_ALIASES,ODEINTERFACE_ALIASES_REVERSED)
+  if prob.mass_matrix != I
+    if typeof(prob.mass_matrix) <: Matrix && !(typeof(alg) <: Union{dopri5,dop853,odex})
+      dict[:MASSMATRIX] = prob.mass_matrix
+    elseif typeof(alg) <: Union{dopri5,dop853,odex}
+      error("This solver does not support mass matrices")
+    else
+      error("This solver must use full or banded mass matrices.")
+    end
+  end
+  if has_jac(prob.f)
+    dict[:JACOBIMATRIX] = (t,u,J) -> prob.f(Val{:jac},t,u,J)
+  end
   opts = ODEInterface.OptionsODE([Pair(ODEINTERFACE_STRINGS[k],v) for (k,v) in dict]...) #Convert to the strings
   if typeof(alg) <: dopri5
     ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.dopri5,f!,tspan,vec(u),opts)
