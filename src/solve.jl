@@ -32,6 +32,10 @@ function solve{uType,tType,isinplace,T<:ODEInterfaceAlgorithm}(
     f! = prob.f
   end
 
+  if !(typeof(prob.f) <: AbstractParameterizedFunction) && has_tgrad(prob.f) && !(typeof(alg) <: Union{dopri5,dop853,odex})
+    warn("Explicit t-gradient given to this stiff solver is ignored. See http://docs.juliadiffeq.org/latest/basics/compatibility_chart.html")
+  end
+
   o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
   dict = buildOptions(o,ODEINTERFACE_OPTION_LIST,ODEINTERFACE_ALIASES,ODEINTERFACE_ALIASES_REVERSED)
   if prob.mass_matrix != I
