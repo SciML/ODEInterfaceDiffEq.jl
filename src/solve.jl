@@ -8,115 +8,136 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     timeseries_errors=true,
     callback=nothing,kwargs...)
 
-    verbose && !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
+    isstiff = !(typeof(alg) <: Union{dopri5,dop853,odex})
+    if verbose
+        warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
+        if !(typeof(prob.f) <: AbstractParameterizedFunction) && isstiff
+            if has_tgrad(prob.f)
+                warn("Explicit t-gradient given to this stiff solver is ignored.")
+                warned = true
+            end
+            if has_jac(prob.f)
+                warn("Explicit Jacobian given to this stiff solver is ignored.")
+                warned = true
+            end
+        end
+        warned && warn_compat()
+    end
 
-  if prob.callback != nothing || callback != nothing
-    error("ODEInterface is not compatible with callbacks.")
-  end
+    if prob.callback != nothing || callback != nothing
+        error("ODEInterface is not compatible with callbacks.")
+    end
 
-  tspan = [t for t in prob.tspan]
+    tspan = [t for t in prob.tspan]
 
-  o = KW(kwargs)
+    o = KW(kwargs)
 
-  u0 = prob.u0
+    u0 = prob.u0
 
-  if typeof(u0) <: Number
-    u = [u0]
-  else
-    u = deepcopy(u0)
-  end
+    if typeof(u0) <: Number
+        u = [u0]
+    else
+        u = deepcopy(u0)
+    end
 
-  sizeu = size(u)
+    sizeu = size(u)
 
+    if !isinplace && typeof(u)<:AbstractArray
+        f! = (t,u,du) -> (du[:] = vec(prob.f(t,reshape(u,sizeu))); nothing)
+    elseif !(typeof(u)<:Vector{Float64})
+        f! = (t,u,du) -> (prob.f(t,reshape(u,sizeu),reshape(du,sizeu));
+                          u = vec(u); du=vec(du); nothing)
+    else
+        f! = prob.f
+    end
 
-  if !isinplace && typeof(u)<:AbstractArray
-    f! = (t,u,du) -> (du[:] = vec(prob.f(t,reshape(u,sizeu))); nothing)
-  elseif !(typeof(u)<:Vector{Float64})
-    f! = (t,u,du) -> (prob.f(t,reshape(u,sizeu),reshape(du,sizeu)); u = vec(u); du=vec(du); nothing)
-  else
-    f! = prob.f
-  end
-
-  if !(typeof(prob.f) <: AbstractParameterizedFunction) && has_tgrad(prob.f) && !(typeof(alg) <: Union{dopri5,dop853,odex})
-    warn("Explicit t-gradient given to this stiff solver is ignored. See http://docs.juliadiffeq.org/latest/basics/compatibility_chart.html")
-  end
-
-  o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
+    o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
     dict = buildOptions(o,
                         ODEINTERFACE_OPTION_LIST,
                         ODEINTERFACE_ALIASES,
                         ODEINTERFACE_ALIASES_REVERSED)
-  if prob.mass_matrix != I
-    if typeof(prob.mass_matrix) <: Matrix && !(typeof(alg) <: Union{dopri5,dop853,odex})
-      dict[:MASSMATRIX] = prob.mass_matrix
-    elseif typeof(alg) <: Union{dopri5,dop853,odex}
-      error("This solver does not support mass matrices")
+    if prob.mass_matrix != I
+        if typeof(prob.mass_matrix) <: Matrix && isstiff
+            dict[:MASSMATRIX] = prob.mass_matrix
+        elseif !isstiff
+            error("This solver does not support mass matrices")
+        else
+            error("This solver must use full or banded mass matrices.")
+        end
+    end
+    if has_jac(prob.f)
+        dict[:JACOBIMATRIX] = (t,u,J) -> prob.f(Val{:jac},t,u,J)
+    end
+
+    # Convert to the strings
+    opts = ODEInterface.OptionsODE([Pair(ODEINTERFACE_STRINGS[k],v) for (k,v) in dict]...)
+
+    if typeof(alg) <: dopri5
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.dopri5, f!, tspan, vec(u), opts)
+    elseif typeof(alg) <: dop853
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.dop853, f!, tspan, vec(u), opts)
+    elseif typeof(alg) <: odex
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.odex, f!, tspan, vec(u), opts)
+    elseif typeof(alg) <: seulex
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.seulex, f!, tspan, vec(u), opts)
+    elseif typeof(alg) <: radau
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.radau, f!, tspan, vec(u), opts)
+    elseif typeof(alg) <: radau5
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.radau5, f!, tspan, vec(u), opts)
+    elseif typeof(alg) <: rodas
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.rodas, f!, tspan, vec(u), opts)
+    end
+
+    if retcode < 0
+        if retcode == -1
+            verbose && warn("Input is not consistent.")
+            return_retcode = :Failure
+        elseif retcode == -2
+            verbose && warn("Interrupted. Larger maxiters is needed.")
+            return_retcode = :MaxIters
+        elseif retcode == -3
+            verbose && warn("Step size went too small.")
+            return_retcode = :DtLessThanMin
+        elseif retcode == -4
+            verbose && warn("Interrupted. Problem is probably stiff.")
+            return_retcode = :Unstable
+        end
     else
-      error("This solver must use full or banded mass matrices.")
+        return_retcode = :Success
     end
-  end
-  if has_jac(prob.f)
-    dict[:JACOBIMATRIX] = (t,u,J) -> prob.f(Val{:jac},t,u,J)
-  end
-  opts = ODEInterface.OptionsODE([Pair(ODEINTERFACE_STRINGS[k],v) for (k,v) in dict]...) #Convert to the strings
-  if typeof(alg) <: dopri5
-    ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.dopri5,f!,tspan,vec(u),opts)
-  elseif typeof(alg) <: dop853
-    ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.dop853,f!,tspan,vec(u),opts)
-  elseif typeof(alg) <: odex
-    ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.odex,f!,tspan,vec(u),opts)
-  elseif typeof(alg) <: seulex
-    ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.seulex,f!,tspan,vec(u),opts)
-  elseif typeof(alg) <: radau
-    ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.radau,f!,tspan,vec(u),opts)
-  elseif typeof(alg) <: radau5
-    ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.radau5,f!,tspan,vec(u),opts)
-  elseif typeof(alg) <: rodas
-    ts,vectimeseries,retcode,stats = ODEInterface.odecall(ODEInterface.rodas,f!,tspan,vec(u),opts)
-  end
-  if retcode < 0
-    if retcode == -1
-      verbose && warn("Input is not consistent.")
-      return_retcode = :Failure
-    elseif retcode == -2
-      verbose && warn("Interrupted. Larger maxiters is needed.")
-      return_retcode = :MaxIters
-    elseif retcode == -3
-      verbose && warn("Step size went too small.")
-      return_retcode = :DtLessThanMin
-    elseif retcode == -4
-      verbose && warn("Interrupted. Problem is probably stiff.")
-      return_retcode = :Unstable
+
+    if save_start
+        start_idx = 1
+    else
+        start_idx = 2
+        ts = ts[2:end]
     end
-  else
-    return_retcode = :Success
-  end
 
-  if save_start
-    start_idx = 1
-  else
-    start_idx = 2
-    ts = ts[2:end]
-  end
-
-  if typeof(u0) <: AbstractArray
-    timeseries = Vector{uType}(0)
-    for i=start_idx:size(vectimeseries,1)
-      push!(timeseries,reshape(view(vectimeseries,i,:,)',sizeu))
+    if typeof(u0) <: AbstractArray
+        timeseries = Vector{uType}(0)
+        for i=start_idx:size(vectimeseries, 1)
+            push!(timeseries, reshape(view(vectimeseries, i, :, )', sizeu))
+        end
+    else
+        timeseries = vec(vectimeseries)
     end
-  else
-    timeseries = vec(vectimeseries)
-  end
 
-    build_solution(prob, alg, ts, timeseries,
+    build_solution(prob,  alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
                    retcode = return_retcode)
 end
 
-function buildOptions(o,optionlist,aliases,aliases_reversed)
-  dict1 = Dict{Symbol,Any}([Pair(k,o[k]) for k in (keys(o) ∩ optionlist)])
-  dict2 = Dict([Pair(aliases_reversed[k],o[k]) for k in (keys(o) ∩ values(aliases))])
-  merge(dict1,dict2)
+function buildOptions(o, optionlist, aliases, aliases_reversed)
+    dict1 = Dict{Symbol,Any}([Pair(k,o[k]) for k in (keys(o) ∩ optionlist)])
+    dict2 = Dict([Pair(aliases_reversed[k],o[k]) for k in (keys(o) ∩ values(aliases))])
+    merge(dict1,dict2)
 end
 
 const ODEINTERFACE_OPTION_LIST =
