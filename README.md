@@ -11,3 +11,11 @@
 This package contains bindings for ODEInterface.jl to allow it to be used with the
 JuliaDiffEq common interface. For more information on using the solvers from this
 package, see the [DifferentialEquations.jl documentation](https://juliadiffeq.github.io/DiffEqDocs.jl/latest/).
+
+## Installation
+
+A standard installation on MacOSX and Linux should work. On Windows, you need to install mingw32 compilers and add them to the path. [MingW32 can be found here](http://www.mingw.org/). Then add the path to your environment variables. An example path is:
+
+```
+C:\Program Files\mingw-w64\x86_64-6.1.0-posix-seh-rt_v5-rev0\mingw64\bin
+```
