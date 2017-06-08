@@ -2,7 +2,10 @@ __precompile__()
 
 module ODEInterfaceDiffEq
 
-using DiffEqBase, ODEInterface, Compat
+using Reexport
+@reexport using DiffEqBase
+  
+using ODEInterface, Compat
 
 import DiffEqBase: solve
 
