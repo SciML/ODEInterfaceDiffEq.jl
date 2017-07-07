@@ -19,3 +19,23 @@ A standard installation on MacOSX and Linux should work. On Windows, you need to
 ```
 C:\Program Files\mingw-w64\x86_64-6.1.0-posix-seh-rt_v5-rev0\mingw64\bin
 ```
+
+## Common API Usage
+
+This library adds the common interface to ODEInterface.jl's solvers. [See the DifferentialEquations.jl documentation for details on the interface](http://docs.juliadiffeq.org/latest/index.html). Following the Lorenz example from [the ODE tutorial](http://docs.juliadiffeq.org/latest/tutorials/ode_example.html), we can solve this using `dopri5` via the following:
+
+```julia
+using ODEInterfaceDiffEq
+function lorenz(t,u,du)
+ du[1] = 10.0(u[2]-u[1])
+ du[2] = u[1]*(28.0-u[3]) - u[2]
+ du[3] = u[1]*u[2] - (8/3)*u[3]
+end
+u0 = [1.0;0.0;0.0]
+tspan = (0.0,100.0)
+prob = ODEProblem(lorenz,u0,tspan)
+sol = solve(prob,dopri5(),abstol=1e-4)
+using Plots; plot(sol,vars=(1,2,3))
+```
+
+The options available in `solve` are documented [at the common solver options page](http://docs.juliadiffeq.org/latest/basics/common_solver_opts.html). The available methods are documented [at the ODE solvers page](http://docs.juliadiffeq.org/latest/solvers/ode_solve.html#ODEInterface.jl-1).
