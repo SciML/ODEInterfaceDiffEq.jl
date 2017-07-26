@@ -22,6 +22,7 @@ end
 include("algorithms.jl")
 include("solve.jl")
 
-export ODEInterfaceAlgorithm, dopri5, dop853, odex, seulex, radau, radau5, rodas
+export ODEInterfaceAlgorithm, dopri5, dop853, odex, seulex, radau, radau5, rodas,
+       ddeabm, ddebdf
 
 end # module

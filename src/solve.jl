@@ -2,13 +2,12 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     prob::AbstractODEProblem{uType,tType,isinplace},
     alg::AlgType,
     timeseries=[],ts=[],ks=[];
-
     verbose=true,
     save_start=true,
     timeseries_errors=true,
     callback=nothing,kwargs...)
 
-    isstiff = !(typeof(alg) <: Union{dopri5,dop853,odex})
+    isstiff = !(typeof(alg) <: Union{dopri5,dop853,odex,ddeabm})
     if verbose
         warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
         if !(typeof(prob.f) <: AbstractParameterizedFunction) && isstiff
@@ -93,6 +92,12 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     elseif typeof(alg) <: rodas
         ts, vectimeseries, retcode, stats =
             ODEInterface.odecall(ODEInterface.rodas, f!, tspan, vec(u), opts)
+    elseif typeof(alg) <: ddeabm
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.ddeabm, f!, tspan, vec(u), opts)
+    elseif typeof(alg) <: ddebdf
+        ts, vectimeseries, retcode, stats =
+            ODEInterface.odecall(ODEInterface.ddebdf, f!, tspan, vec(u), opts)
     end
 
     if retcode < 0
