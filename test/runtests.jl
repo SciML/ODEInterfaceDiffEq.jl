@@ -83,8 +83,6 @@ sol =solve(prob,rodas();dt=1//2^(4))
 
 sol =solve(prob,ddebdf();dt=1//2^(4))
 
-using ODEInterfaceDiffEq, DiffEqBase, Base.Test
-
 jac_called = false
 
 function Lotka(t,u,du)
