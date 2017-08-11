@@ -15,10 +15,6 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
                 warn("Explicit t-gradient given to this stiff solver is ignored.")
                 warned = true
             end
-            if has_jac(prob.f)
-                warn("Explicit Jacobian given to this stiff solver is ignored.")
-                warned = true
-            end
         end
         warned && warn_compat()
     end
