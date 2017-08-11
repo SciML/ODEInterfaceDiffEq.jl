@@ -126,15 +126,15 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     end
 
     if typeof(u0) <: AbstractArray
-        timeseries = Vector{uType}(0)
+        _timeseries = Vector{uType}(0)
         for i=start_idx:size(vectimeseries, 1)
-            push!(timeseries, reshape(view(vectimeseries, i, :, )', sizeu))
+            push!(_timeseries, reshape(view(vectimeseries, i, :, )', sizeu))
         end
     else
-        timeseries = vec(vectimeseries)
+        _timeseries = vec(vectimeseries)
     end
 
-    build_solution(prob,  alg, ts, timeseries,
+    build_solution(prob,  alg, ts, _timeseries,
                    timeseries_errors = timeseries_errors,
                    retcode = return_retcode)
 end
