@@ -19,11 +19,9 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         warned && warn_compat()
     end
 
-    if prob.callback != nothing || callback != nothing
-        error("ODEInterface is not compatible with callbacks.")
-    end
+    callbacks_internal = CallbackSet(callback,prob.callback)
 
-    tspan = [t for t in prob.tspan]
+    tspan = prob.tspan
 
     o = KW(kwargs)
 
@@ -47,6 +45,34 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     end
 
     o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
+
+    _timeseries = Vector{uType}(0)
+    ts = Vector{tType}(0)
+
+    function outputfcn(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
+          tprev::Float64, t::Float64, u::Vector{Float64},
+          eval_sol_fcn, extra_data::Dict)
+
+      if reason == ODEInterface.OUTPUTFCN_CALL_STEP
+        push!(ts,t); save_value!(_timeseries,u,uType,sizeu)
+      end
+      #=
+      if orig_outputmode == OUTPUTFCN_NEVER || orig_outputfcn == nothing
+        return OUTPUTFCN_RET_CONTINUE
+      else
+        return orig_outputfcn(reason,told,tnew,x,eval_sol_fcn,extra_data)
+      end
+      =#
+      return ODEInterface.OUTPUTFCN_RET_CONTINUE
+    end
+
+    o[:OUTPUTFCN] = outputfcn
+    if !(typeof(callbacks_internal.continuous_callbacks)<:Tuple{})
+        o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_DENSE
+    else
+        o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_WODENSE
+    end
+
     dict = buildOptions(o,
                         ODEINTERFACE_OPTION_LIST,
                         ODEINTERFACE_ALIASES,
@@ -67,33 +93,34 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     # Convert to the strings
     opts = ODEInterface.OptionsODE([Pair(ODEINTERFACE_STRINGS[k],v) for (k,v) in dict]...)
 
+
     if typeof(alg) <: dopri5
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.dopri5, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.dopri5(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: dop853
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.dop853, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.dop853(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: odex
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.odex, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.odex(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: seulex
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.seulex, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.seulex(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: radau
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.radau, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.radau(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: radau5
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.radau5, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.radau5(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: rodas
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.rodas, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.rodas(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: ddeabm
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.ddeabm, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.ddeabm(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: ddebdf
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.ddebdf, f!, tspan, vec(u), opts)
+        _, _, retcode, stats =
+            ODEInterface.ddebdf(f!, tspan[1], tspan[2], vec(u), opts)
     end
 
     if retcode < 0
@@ -114,25 +141,21 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         return_retcode = :Success
     end
 
-    if save_start
-        start_idx = 1
-    else
-        start_idx = 2
-        ts = ts[2:end]
-    end
-
-    if typeof(u0) <: AbstractArray
-        _timeseries = Vector{uType}(0)
-        for i=start_idx:size(vectimeseries, 1)
-            push!(_timeseries, reshape(view(vectimeseries, i, :, )', sizeu))
-        end
-    else
-        _timeseries = vec(vectimeseries)
-    end
-
     build_solution(prob,  alg, ts, _timeseries,
                    timeseries_errors = timeseries_errors,
                    retcode = return_retcode)
+end
+
+function save_value!(_timeseries,u,::Type{T},sizeu) where T<:Number
+    push!(_timeseries,first(u))
+end
+
+function save_value!(_timeseries,u,::Type{T},sizeu) where T<:Vector
+    push!(_timeseries,u)
+end
+
+function save_value!(_timeseries,u,::Type{T},sizeu) where T<:Array
+    push!(_timeseries,reshape(u,sizeu))
 end
 
 function buildOptions(o, optionlist, aliases, aliases_reversed)

@@ -4,14 +4,14 @@ module ODEInterfaceDiffEq
 
 using Reexport
 @reexport using DiffEqBase
-  
+
 using ODEInterface, Compat
 
 import DiffEqBase: solve
 
 const warnkeywords =
     (:save_idxs, :d_discontinuities, :unstable_check,
-     :calck, :progress, :timeseries_steps, :dense)
+     :calck, :progress, :timeseries_steps, :dense,:save_start)
 
 function __init__()
     const global warnlist = Set(warnkeywords)
