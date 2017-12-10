@@ -60,36 +60,40 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         ts = [tspan[1]]
     end
 
+    sol = build_solution(prob,  alg, ts, _timeseries,
+                         timeseries_errors = timeseries_errors,
+                         retcode = :Default)
+
     opts = DEOptions(saveat_internal,save_everystep,callbacks_internal)
-    integrator = ODEInterfaceIntegrator(opts)
+    integrator = ODEInterfaceIntegrator(u,tspan[1],tspan[1],opts,
+                                        false,tdir,sizeu,sol)
 
     function outputfcn(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
           tprev::Float64, t::Float64, u::Vector{Float64},
           eval_sol_fcn, extra_data::Dict)
 
       if reason == ODEInterface.OUTPUTFCN_CALL_STEP
-        if save_everystep
-            push!(ts,t); save_value!(_timeseries,u,uType,sizeu)
-        end
 
-        while !isempty(integrator.opts.saveat) &&
-            tdir*top(integrator.opts.saveat) < tdir*t
-            curt = pop!(integrator.opts.saveat)
-            tmp = eval_sol_fcn(curt)
-            push!(ts,curt); save_value!(_timeseries,tmp,uType,sizeu)
-        end
+          if eltype(integrator.sol.u) <: Vector
+              integrator.u .= u
+          else
+              integrator.u .= reshape(u,integrator.sizeu)
+          end
+          integrator.t = t
+          integrator.tprev = tprev
+
+          handle_callbacks!(integrator,u,eval_sol_fcn)
+
+          if integrator.u_modified
+              return ODEInterface.OUTPUTFCN_RET_CONTINUE_XCHANGED
+          else
+              return ODEInterface.OUTPUTFCN_RET_CONTINUE
+          end
+          # TODO: ODEInterface.OUTPUTFCN_RET_STOP for terminate!
 
       end
 
-
-      #=
-      if orig_outputmode == OUTPUTFCN_NEVER || orig_outputfcn == nothing
-        return OUTPUTFCN_RET_CONTINUE
-      else
-        return orig_outputfcn(reason,told,tnew,x,eval_sol_fcn,extra_data)
-      end
-      =#
-      return ODEInterface.OUTPUTFCN_RET_CONTINUE
+      ODEInterface.OUTPUTFCN_RET_CONTINUE
     end
 
     o[:OUTPUTFCN] = outputfcn
@@ -177,9 +181,7 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         return_retcode = :Success
     end
 
-    build_solution(prob,  alg, ts, _timeseries,
-                   timeseries_errors = timeseries_errors,
-                   retcode = return_retcode)
+    solution_new_retcode(sol,return_retcode)
 end
 
 function save_value!(_timeseries,u,::Type{T},sizeu) where T<:Number

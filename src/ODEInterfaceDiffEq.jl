@@ -21,6 +21,8 @@ end
 
 include("algorithms.jl")
 include("integrator_types.jl")
+include("integrator_utils.jl")
+include("callbacks.jl")
 include("solve.jl")
 
 export ODEInterfaceAlgorithm, dopri5, dop853, odex, seulex, radau, radau5, rodas,
