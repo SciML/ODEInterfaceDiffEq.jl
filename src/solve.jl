@@ -5,7 +5,7 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     saveat = Float64[],
     verbose=true,save_everystep = isempty(saveat),
     save_start=true,
-    timeseries_errors=true,
+    timeseries_errors=true,dense_errors=false,
     callback=nothing,kwargs...)
 
     isstiff = !(typeof(alg) <: Union{dopri5,dop853,odex,ddeabm})
@@ -70,44 +70,7 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],opts,
                                         false,tdir,sizeu,sol,InterpFunction((t)->[t]))
 
-    function outputfcn(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
-          tprev::Float64, t::Float64, u::Vector{Float64},
-          eval_sol_fcn, extra_data::Dict)
-
-      if reason == ODEInterface.OUTPUTFCN_CALL_STEP
-
-          integrator.uprev .= integrator.u
-          if eltype(integrator.sol.u) <: Vector
-              integrator.u .= u
-          else
-              integrator.u .= reshape(u,integrator.sizeu)
-          end
-          integrator.t = t
-          integrator.tprev = tprev
-          integrator.eval_sol_fcn = InterpFunction(eval_sol_fcn)
-
-          handle_callbacks!(integrator,eval_sol_fcn)
-
-          if integrator.u_modified
-
-              if eltype(integrator.sol.u) <: Vector
-                  u .= integrator.u
-              else
-                  tmp = reshape(u,integrator.sizeu)
-                  tmp .= integrator.u
-              end
-
-              return ODEInterface.OUTPUTFCN_RET_CONTINUE_XCHANGED
-          else
-              return ODEInterface.OUTPUTFCN_RET_CONTINUE
-          end
-          # TODO: ODEInterface.OUTPUTFCN_RET_STOP for terminate!
-
-      end
-
-      ODEInterface.OUTPUTFCN_RET_CONTINUE
-    end
-
+    outputfcn = OutputFunction(integrator)
     o[:OUTPUTFCN] = outputfcn
     if !(typeof(callbacks_internal.continuous_callbacks)<:Tuple{}) || !isempty(saveat)
         if typeof(alg) <: Union{ddeabm,ddebdf}
@@ -191,6 +154,12 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         end
     else
         return_retcode = :Success
+    end
+
+    if has_analytic(prob.f)
+        calculate_solution_errors!(integrator.sol;
+        timeseries_errors=timeseries_errors,
+        dense_errors=dense_errors)
     end
 
     solution_new_retcode(sol,return_retcode)
@@ -332,3 +301,47 @@ const ODEINTERFACE_STRINGS = Dict{Symbol,String}(
   :BVPCLASS         => "BoundaryValueProblemClass",
   :SOLMETHOD        => "SolutionMethod",
   :IVPOPT           => "OptionsForIVPsolver")
+
+struct OutputFunction{T} <: Function
+    integrator::T
+end
+
+function (f::OutputFunction)(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
+      tprev::Float64, t::Float64, u::Vector{Float64},
+      eval_sol_fcn, extra_data::Dict)
+
+  if reason == ODEInterface.OUTPUTFCN_CALL_STEP
+
+      integrator = f.integrator
+
+      integrator.uprev .= integrator.u
+      if eltype(integrator.sol.u) <: Vector
+          integrator.u .= u
+      else
+          integrator.u .= reshape(u,integrator.sizeu)
+      end
+      integrator.t = t
+      integrator.tprev = tprev
+      integrator.eval_sol_fcn = InterpFunction(eval_sol_fcn)
+
+      handle_callbacks!(integrator,eval_sol_fcn)
+
+      if integrator.u_modified
+
+          if eltype(integrator.sol.u) <: Vector
+              u .= integrator.u
+          else
+              tmp = reshape(u,integrator.sizeu)
+              tmp .= integrator.u
+          end
+
+          return ODEInterface.OUTPUTFCN_RET_CONTINUE_XCHANGED
+      else
+          return ODEInterface.OUTPUTFCN_RET_CONTINUE
+      end
+      # TODO: ODEInterface.OUTPUTFCN_RET_STOP for terminate!
+
+  end
+
+  ODEInterface.OUTPUTFCN_RET_CONTINUE
+end
