@@ -34,7 +34,7 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,force_save=fa
   while !isempty(integrator.opts.saveat) &&
       integrator.tdir*top(integrator.opts.saveat) < integrator.tdir*integrator.t
       curt = pop!(integrator.opts.saveat)
-      tmp = eval_sol_fcn(curt)
+      tmp = integrator(curt)
       push!(integrator.sol.t,curt)
       save_value!(integrator.sol.u,tmp,uType,integrator.sizeu)
   end

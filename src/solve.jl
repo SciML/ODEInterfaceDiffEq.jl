@@ -60,7 +60,7 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         ts = [tspan[1]]
     end
 
-    uprev = similar(u0)
+    uprev = similar(u)
 
     sol = build_solution(prob,  alg, ts, _timeseries,
                          timeseries_errors = timeseries_errors,
