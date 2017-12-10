@@ -60,13 +60,15 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         ts = [tspan[1]]
     end
 
+    uprev = similar(u0)
+
     sol = build_solution(prob,  alg, ts, _timeseries,
                          timeseries_errors = timeseries_errors,
                          retcode = :Default)
 
     opts = DEOptions(saveat_internal,save_everystep,callbacks_internal)
-    integrator = ODEInterfaceIntegrator(u,tspan[1],tspan[1],opts,
-                                        false,tdir,sizeu,sol)
+    integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],opts,
+                                        false,tdir,sizeu,sol,InterpFunction((t)->[t]))
 
     function outputfcn(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
           tprev::Float64, t::Float64, u::Vector{Float64},
@@ -74,6 +76,7 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
 
       if reason == ODEInterface.OUTPUTFCN_CALL_STEP
 
+          integrator.uprev .= integrator.u
           if eltype(integrator.sol.u) <: Vector
               integrator.u .= u
           else
@@ -81,10 +84,19 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
           end
           integrator.t = t
           integrator.tprev = tprev
+          integrator.eval_sol_fcn = InterpFunction(eval_sol_fcn)
 
-          handle_callbacks!(integrator,u,eval_sol_fcn)
+          handle_callbacks!(integrator,eval_sol_fcn)
 
           if integrator.u_modified
+
+              if eltype(integrator.sol.u) <: Vector
+                  u .= integrator.u
+              else
+                  tmp = reshape(u,integrator.sizeu)
+                  tmp .= integrator.u
+              end
+
               return ODEInterface.OUTPUTFCN_RET_CONTINUE_XCHANGED
           else
               return ODEInterface.OUTPUTFCN_RET_CONTINUE

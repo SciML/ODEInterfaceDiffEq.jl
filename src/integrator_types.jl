@@ -4,8 +4,9 @@ mutable struct DEOptions{SType,CType}
     callback::CType
 end
 
-mutable struct ODEInterfaceIntegrator{uType,oType,SType,solType} <: AbstractODEIntegrator
+mutable struct ODEInterfaceIntegrator{uType,uPrevType,oType,SType,solType} <: AbstractODEIntegrator
     u::uType
+    uprev::uPrevType
     t::Float64
     tprev::Float64
     opts::oType
@@ -13,4 +14,7 @@ mutable struct ODEInterfaceIntegrator{uType,oType,SType,solType} <: AbstractODEI
     tdir::Float64
     sizeu::SType
     sol::solType
+    eval_sol_fcn::InterpFunction
 end
+
+(integrator::ODEInterfaceIntegrator)(t) = integrator.eval_sol_fcn(t)

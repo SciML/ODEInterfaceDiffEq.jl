@@ -4,3 +4,5 @@ DiffEqBase 1.5.1
 Compat 0.17.0
 Reexport
 DataStructures
+FunctionWrappers
+Roots

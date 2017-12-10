@@ -5,7 +5,7 @@ module ODEInterfaceDiffEq
 using Reexport
 @reexport using DiffEqBase
 
-using ODEInterface, Compat, DataStructures
+using ODEInterface, Compat, DataStructures, FunctionWrappers, Roots
 
 import DiffEqBase: solve
 
@@ -18,6 +18,8 @@ function __init__()
 end
 
 @compat const KW = Dict{Symbol,Any}
+
+const InterpFunction = FunctionWrappers.FunctionWrapper{Vector{Float64},Tuple{Float64}}
 
 include("algorithms.jl")
 include("integrator_types.jl")

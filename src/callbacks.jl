@@ -51,14 +51,14 @@ end
   else
     next_sign = sign(callback.condition(integrator.t,@view(integrator.u[callback.idxs]),integrator))
   end
+  @show prev_sign,next_sign
   if ((prev_sign<0 && !(typeof(callback.affect!)<:Void)) || (prev_sign>0 && !(typeof(callback.affect_neg!)<:Void))) && prev_sign*next_sign<=0
     event_occurred = true
     interp_index = callback.interp_points
   elseif callback.interp_points!=0  # Use the interpolants for safety checking
-    tmp = integrator.tmp
     for i in 2:length(Θs)-1
       if !(typeof(callback.idxs) <: Number)
-        integrator(tmp,integrator.tprev+dt*Θs[i])
+        tmp = integrator(integrator.tprev+dt*Θs[i])
         callback.idxs == nothing ? _tmp = tmp : _tmp = @view tmp[callback.idxs]
       else
         _tmp = integrator(integrator.tprev+dt*Θs[i])[callback.idxs]
@@ -93,10 +93,9 @@ function find_callback_time(integrator,callback)
         bottom_θ = typeof(integrator.t)(0)
       end
       if callback.rootfind
-        tmp = integrator.tmp
         find_zero = (Θ) -> begin
           if !(typeof(callback.idxs) <: Number)
-            integrator(tmp,integrator.tprev+Θ*dt)
+            tmp = integrator(integrator.tprev+Θ*dt)
             callback.idxs == nothing ? _tmp = tmp : _tmp = @view tmp[callback.idxs]
           else
             _tmp = integrator(integrator.tprev+Θ*dt)[callback.idxs]
@@ -128,7 +127,12 @@ end
 function apply_callback!(integrator,callback::ContinuousCallback,cb_time,prev_sign)
   if cb_time != zero(typeof(integrator.t))
     integrator.t = integrator.tprev+cb_time
-    integrator(integrator.u,integrator.t)
+    tmp = integrator(integrator.t)
+    if eltype(integrator.sol.u) <: Vector
+        integrator.u .= tmp
+    else
+        integrator.u .= reshape(tmp,integrator.sizeu)
+    end
   end
   saved_in_cb = false
 
