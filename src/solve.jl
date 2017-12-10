@@ -2,9 +2,10 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     prob::AbstractODEProblem{uType,tType,isinplace},
     alg::AlgType,
     timeseries=[],ts=[],ks=[];
-    verbose=true,
+    saveat = Float64[],
+    verbose=true,save_everystep = isempty(saveat),
     save_start=true,
-    timeseries_errors=true,
+    timeseries_errors=true,dense_errors=false,
     callback=nothing,kwargs...)
 
     isstiff = !(typeof(alg) <: Union{dopri5,dop853,odex,ddeabm})
@@ -19,11 +20,9 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         warned && warn_compat()
     end
 
-    if prob.callback != nothing || callback != nothing
-        error("ODEInterface is not compatible with callbacks.")
-    end
+    callbacks_internal = CallbackSet(callback,prob.callback)
 
-    tspan = [t for t in prob.tspan]
+    tspan = prob.tspan
 
     o = KW(kwargs)
 
@@ -34,6 +33,11 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     else
         u = deepcopy(u0)
     end
+
+    tdir = sign(tspan[2]-tspan[1])
+
+    saveat_internal =
+      saveat_disc_handling(saveat,tdir,tspan,tType)
 
     sizeu = size(u)
 
@@ -47,6 +51,39 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     end
 
     o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
+
+    if save_everystep
+        _timeseries = Vector{uType}(0)
+        ts = Vector{tType}(0)
+    else
+        _timeseries = [copy(u0)]
+        ts = [tspan[1]]
+    end
+
+    uprev = similar(u)
+
+    sol = build_solution(prob,  alg, ts, _timeseries,
+                         timeseries_errors = timeseries_errors,
+                         calculate_error = false,
+                         retcode = :Default)
+
+    opts = DEOptions(saveat_internal,save_everystep,callbacks_internal)
+    integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],opts,
+                                        false,tdir,sizeu,sol,InterpFunction((t)->[t]))
+
+    outputfcn = OutputFunction(integrator)
+    o[:OUTPUTFCN] = outputfcn
+    if !(typeof(callbacks_internal.continuous_callbacks)<:Tuple{}) || !isempty(saveat)
+        if typeof(alg) <: Union{ddeabm,ddebdf}
+            warn("saveat and continuous callbacks ignored for ddeabm and ddebdf")
+            o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_WODENSE
+        else
+            o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_DENSE
+        end
+    else
+        o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_WODENSE
+    end
+
     dict = buildOptions(o,
                         ODEINTERFACE_OPTION_LIST,
                         ODEINTERFACE_ALIASES,
@@ -67,33 +104,39 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     # Convert to the strings
     opts = ODEInterface.OptionsODE([Pair(ODEINTERFACE_STRINGS[k],v) for (k,v) in dict]...)
 
+
     if typeof(alg) <: dopri5
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.dopri5, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.dopri5(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: dop853
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.dop853, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.dop853(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: odex
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.odex, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.odex(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: seulex
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.seulex, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.seulex(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: radau
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.radau, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.radau(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: radau5
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.radau5, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.radau5(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: rodas
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.rodas, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.rodas(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: ddeabm
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.ddeabm, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.ddeabm(f!, tspan[1], tspan[2], vec(u), opts)
     elseif typeof(alg) <: ddebdf
-        ts, vectimeseries, retcode, stats =
-            ODEInterface.odecall(ODEInterface.ddebdf, f!, tspan, vec(u), opts)
+        tend, uend, retcode, stats =
+            ODEInterface.ddebdf(f!, tspan[1], tspan[2], vec(u), opts)
+    end
+
+    if !save_everystep
+        push!(ts,tend)
+        save_value!(_timeseries,uend,uType,sizeu)
     end
 
     if retcode < 0
@@ -114,31 +157,52 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         return_retcode = :Success
     end
 
-    if save_start
-        start_idx = 1
-    else
-        start_idx = 2
-        ts = ts[2:end]
+    if has_analytic(prob.f)
+        calculate_solution_errors!(integrator.sol;
+        timeseries_errors=timeseries_errors,
+        dense_errors=dense_errors)
     end
 
-    if typeof(u0) <: AbstractArray
-        _timeseries = Vector{uType}(0)
-        for i=start_idx:size(vectimeseries, 1)
-            push!(_timeseries, reshape(view(vectimeseries, i, :, )', sizeu))
-        end
-    else
-        _timeseries = vec(vectimeseries)
-    end
+    solution_new_retcode(sol,return_retcode)
+end
 
-    build_solution(prob,  alg, ts, _timeseries,
-                   timeseries_errors = timeseries_errors,
-                   retcode = return_retcode)
+function save_value!(_timeseries,u,::Type{T},sizeu) where T<:Number
+    push!(_timeseries,first(u))
+end
+
+function save_value!(_timeseries,u,::Type{T},sizeu) where T<:Vector
+    push!(_timeseries,u)
+end
+
+function save_value!(_timeseries,u,::Type{T},sizeu) where T<:Array
+    push!(_timeseries,reshape(u,sizeu))
 end
 
 function buildOptions(o, optionlist, aliases, aliases_reversed)
     dict1 = Dict{Symbol,Any}([Pair(k,o[k]) for k in (keys(o) ∩ optionlist)])
     dict2 = Dict([Pair(aliases_reversed[k],o[k]) for k in (keys(o) ∩ values(aliases))])
     merge(dict1,dict2)
+end
+
+function saveat_disc_handling(saveat,tdir,tspan,tType)
+
+  if typeof(saveat) <: Number
+    if (tspan[1]:saveat:tspan[end])[end] == tspan[end]
+      saveat_vec = convert(Vector{tType},collect(tType,tspan[1]+saveat:saveat:tspan[end]))
+    else
+      saveat_vec = convert(Vector{tType},collect(tType,tspan[1]+saveat:saveat:(tspan[end]-saveat)))
+    end
+  else
+    saveat_vec = vec(collect(tType,Iterators.filter(x->tdir*tspan[1]<tdir*x<tdir*tspan[end],saveat)))
+  end
+
+  if tdir>0
+    saveat_internal = binary_minheap(saveat_vec)
+  else
+    saveat_internal = binary_maxheap(saveat_vec)
+  end
+
+  saveat_internal
 end
 
 const ODEINTERFACE_OPTION_LIST =
@@ -238,3 +302,47 @@ const ODEINTERFACE_STRINGS = Dict{Symbol,String}(
   :BVPCLASS         => "BoundaryValueProblemClass",
   :SOLMETHOD        => "SolutionMethod",
   :IVPOPT           => "OptionsForIVPsolver")
+
+struct OutputFunction{T} <: Function
+    integrator::T
+end
+
+function (f::OutputFunction)(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
+      tprev::Float64, t::Float64, u::Vector{Float64},
+      eval_sol_fcn, extra_data::Dict)
+
+  if reason == ODEInterface.OUTPUTFCN_CALL_STEP
+
+      integrator = f.integrator
+
+      integrator.uprev .= integrator.u
+      if eltype(integrator.sol.u) <: Vector
+          integrator.u .= u
+      else
+          integrator.u .= reshape(u,integrator.sizeu)
+      end
+      integrator.t = t
+      integrator.tprev = tprev
+      integrator.eval_sol_fcn = InterpFunction(eval_sol_fcn)
+
+      handle_callbacks!(integrator,eval_sol_fcn)
+
+      if integrator.u_modified
+
+          if eltype(integrator.sol.u) <: Vector
+              u .= integrator.u
+          else
+              tmp = reshape(u,integrator.sizeu)
+              tmp .= integrator.u
+          end
+
+          return ODEInterface.OUTPUTFCN_RET_CONTINUE_XCHANGED
+      else
+          return ODEInterface.OUTPUTFCN_RET_CONTINUE
+      end
+      # TODO: ODEInterface.OUTPUTFCN_RET_STOP for terminate!
+
+  end
+
+  ODEInterface.OUTPUTFCN_RET_CONTINUE
+end
