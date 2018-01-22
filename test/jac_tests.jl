@@ -3,13 +3,13 @@ using Base.Test
 
 jac_called = false
 
-function Lotka(t,u,du)
+function Lotka(du,u,p,t)
   du[1] = u[1] - u[1] * u[2] # REPL[7], line 3:
   du[2] = -3 * u[2] + 1 * u[1] * u[2]
   nothing
 end
 
-function Lotka(::Type{Val{:jac}},t,u,J)
+function Lotka(::Type{Val{:jac}},J,u,p,t)
   global jac_called
   jac_called = true
   J[1,1] = 1.0 - u[2]

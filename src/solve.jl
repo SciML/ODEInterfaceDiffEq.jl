@@ -42,12 +42,12 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     sizeu = size(u)
 
     if !isinplace && typeof(u)<:AbstractArray
-        f! = (t,u,du) -> (du[:] = vec(prob.f(t,reshape(u,sizeu))); nothing)
+        f! = (t,u,du) -> (du[:] = vec(prob.f(reshape(u,sizeu),prob.p,t)); nothing)
     elseif !(typeof(u)<:Vector{Float64})
-        f! = (t,u,du) -> (prob.f(t,reshape(u,sizeu),reshape(du,sizeu));
-                          u = vec(u); du=vec(du); nothing)
+        f! = (t,u,du) -> (prob.f(reshape(du,sizeu),reshape(u,sizeu),prob.p,t);
+                          du=vec(du); nothing)
     else
-        f! = prob.f
+        f! = (t,u,du) -> prob.f(du,u,prob.p,t)
     end
 
     o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
@@ -98,7 +98,7 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         end
     end
     if has_jac(prob.f)
-        dict[:JACOBIMATRIX] = (t,u,J) -> prob.f(Val{:jac},t,u,J)
+        dict[:JACOBIMATRIX] = (t,u,J) -> prob.f(Val{:jac},J,u,prob.p,t)
     end
 
     # Convert to the strings

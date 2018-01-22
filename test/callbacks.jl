@@ -1,6 +1,6 @@
 using ODEInterfaceDiffEq, Base.Test
 
-callback_f = function (t,u,du)
+callback_f = function (du,u,p,t)
   du[1] = u[2]
   du[2] = -9.81
 end
