@@ -5,7 +5,7 @@ callback_f = function (du,u,p,t)
   du[2] = -9.81
 end
 
-condtion= function (t,u,integrator) # Event when event_f(t,u,k) == 0
+condtion= function (u,t,integrator) # Event when event_f(u,t,k) == 0
   u[1]
 end
 
@@ -22,6 +22,5 @@ prob = ODEProblem(callback_f,u0,tspan)
 
 sol = solve(prob,dopri5(),callback=callback,dtmax=0.5)
 @test sol(4.0)[1] > 0
-
 sol = solve(prob,dopri5(),callback=callback)
 @test sol(4.0)[1] > 0
