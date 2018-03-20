@@ -15,6 +15,7 @@ mutable struct ODEInterfaceIntegrator{uType,uPrevType,oType,SType,solType} <: Ab
     sizeu::SType
     sol::solType
     eval_sol_fcn::InterpFunction
+    event_last_time::Bool
 end
 
 (integrator::ODEInterfaceIntegrator)(t) = integrator.eval_sol_fcn(t)

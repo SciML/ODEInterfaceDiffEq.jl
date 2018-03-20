@@ -69,7 +69,8 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
 
     opts = DEOptions(saveat_internal,save_everystep,callbacks_internal)
     integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],opts,
-                                        false,tdir,sizeu,sol,InterpFunction((t)->[t]))
+                                        false,tdir,sizeu,sol,
+                                        InterpFunction((t)->[t]),false)
 
     outputfcn = OutputFunction(integrator)
     o[:OUTPUTFCN] = outputfcn
