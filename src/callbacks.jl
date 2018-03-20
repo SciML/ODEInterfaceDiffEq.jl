@@ -55,7 +55,7 @@ end
     event_occurred = true
     interp_index = callback.interp_points
   elseif callback.interp_points!=0  # Use the interpolants for safety checking
-    for i in 2:length(Θs)-1
+    for i in 2:length(Θs)
       if !(typeof(callback.idxs) <: Number)
         tmp = integrator(integrator.tprev+dt*Θs[i])
         callback.idxs == nothing ? _tmp = tmp : _tmp = @view tmp[callback.idxs]
