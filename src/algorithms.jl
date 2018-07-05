@@ -1,6 +1,6 @@
 # ODEInterface.jl Algorithms
 
-@compat abstract type ODEInterfaceAlgorithm <: AbstractODEAlgorithm end
+@compat abstract type ODEInterfaceAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 immutable dopri5 <: ODEInterfaceAlgorithm end
 immutable dop853 <: ODEInterfaceAlgorithm end
 immutable odex <: ODEInterfaceAlgorithm end

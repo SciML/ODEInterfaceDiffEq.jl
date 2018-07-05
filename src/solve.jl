@@ -1,5 +1,5 @@
 function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
-    prob::AbstractODEProblem{uType,tType,isinplace},
+    prob::DiffEqBase.AbstractODEProblem{uType,tType,isinplace},
     alg::AlgType,
     timeseries=[],ts=[],ks=[];
     saveat = Float64[],
