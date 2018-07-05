@@ -14,7 +14,7 @@ function handle_callbacks!(integrator,eval_sol_fcn)
       integrator.event_last_time = true
       continuous_modified,saved_in_cb = apply_callback!(integrator,continuous_callbacks[idx],time,upcrossing)
     else
-      integrator.event_last_time = false 
+      integrator.event_last_time = false
     end
   end
   if !(typeof(discrete_callbacks)<:Tuple{})
@@ -38,7 +38,7 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,force_save=fa
   while !isempty(integrator.opts.saveat) &&
       integrator.tdir*top(integrator.opts.saveat) < integrator.tdir*integrator.t
       curt = pop!(integrator.opts.saveat)
-      tmp = integrator(curt)
+      tmp = integrator(curt)::Vector{Float64}
       push!(integrator.sol.t,curt)
       save_value!(integrator.sol.u,tmp,uType,integrator.sizeu)
   end

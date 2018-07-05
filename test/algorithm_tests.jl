@@ -1,5 +1,4 @@
-using ODEInterfaceDiffEq, DiffEqProblemLibrary, DiffEqBase
-using Base.Test
+using ODEInterfaceDiffEq, DiffEqProblemLibrary, DiffEqBase, Test
 
 prob = prob_ode_linear
 sol =solve(prob,dopri5(),dt=1//2^(4))

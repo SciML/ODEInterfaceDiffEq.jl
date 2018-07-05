@@ -19,8 +19,6 @@ end
 
 @compat const KW = Dict{Symbol,Any}
 
-const InterpFunction = FunctionWrappers.FunctionWrapper{Vector{Float64},Tuple{Float64}}
-
 include("algorithms.jl")
 include("integrator_types.jl")
 include("integrator_utils.jl")

@@ -53,10 +53,10 @@ end
     # of the true value due to it being =0 sans floating point issues.
 
     if !(typeof(callback.idxs) <: Number)
-      tmp = integrator(integrator.tprev+100eps(typeof(integrator.tprev)))
+      tmp = integrator(integrator.tprev+100eps(typeof(integrator.tprev)))::Vector{Float64}
       callback.idxs == nothing ? _tmp = tmp : _tmp = @view tmp[callback.idxs]
     else
-      _tmp = integrator(integrator.tprev+100eps(typeof(integrator.tprev)))[callback.idxs]
+      _tmp = integrator((integrator.tprev+100eps(typeof(integrator.tprev)))::Vector{Float64})[callback.idxs]
     end
 
     tmp_condition = callback.condition(_tmp,integrator.tprev +
@@ -82,10 +82,10 @@ end
   elseif callback.interp_points!=0  # Use the interpolants for safety checking
     for i in 2:length(Θs)
       if !(typeof(callback.idxs) <: Number)
-        tmp = integrator(integrator.tprev+dt*Θs[i])
+        tmp = integrator(integrator.tprev+dt*Θs[i])::Vector{Float64}
         callback.idxs == nothing ? _tmp = tmp : _tmp = @view tmp[callback.idxs]
       else
-        _tmp = integrator(integrator.tprev+dt*Θs[i])[callback.idxs]
+        _tmp = (integrator(integrator.tprev+dt*Θs[i])::Vector{Float64})[callback.idxs]
       end
       new_sign = callback.condition(_tmp,integrator.tprev+dt*Θs[i],integrator)
       if prev_sign == 0
@@ -119,10 +119,10 @@ function find_callback_time(integrator,callback)
       if callback.rootfind
         zero_func = (Θ) -> begin
           if !(typeof(callback.idxs) <: Number)
-            tmp = integrator(integrator.tprev+Θ*dt)
+            tmp = integrator(integrator.tprev+Θ*dt)::Vector{Float64}
             callback.idxs == nothing ? _tmp = tmp : _tmp = @view tmp[callback.idxs]
           else
-            _tmp = integrator(integrator.tprev+Θ*dt)[callback.idxs]
+            _tmp = (integrator(integrator.tprev+Θ*dt)::Vector{Float64})[callback.idxs]
           end
           out = callback.condition(tmp,integrator.tprev+Θ*dt,integrator)
           out
@@ -153,7 +153,7 @@ end
 function apply_callback!(integrator,callback::ContinuousCallback,cb_time,prev_sign)
   if cb_time != zero(typeof(integrator.t))
     integrator.t = integrator.tprev+cb_time
-    tmp = integrator(integrator.t)
+    tmp = integrator(integrator.t)::Vector{Float64}
     if eltype(integrator.sol.u) <: Vector
         integrator.u .= tmp
     else

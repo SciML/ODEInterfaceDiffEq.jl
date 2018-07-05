@@ -14,7 +14,7 @@ mutable struct ODEInterfaceIntegrator{uType,uPrevType,oType,SType,solType} <: Di
     tdir::Float64
     sizeu::SType
     sol::solType
-    eval_sol_fcn::InterpFunction
+    eval_sol_fcn
     event_last_time::Bool
 end
 
