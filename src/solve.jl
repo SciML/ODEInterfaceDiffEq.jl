@@ -1,5 +1,5 @@
-function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
-    prob::DiffEqBase.AbstractODEProblem{uType,tType,isinplace},
+function solve{uType,tuptType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
+    prob::DiffEqBase.AbstractODEProblem{uType,tuptType,isinplace},
     alg::AlgType,
     timeseries=[],ts=[],ks=[];
     saveat = Float64[],
@@ -8,11 +8,13 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     timeseries_errors=true,dense_errors=false,
     callback=nothing,kwargs...)
 
+    tType = eltype(tuptType)
+
     isstiff = !(typeof(alg) <: Union{dopri5,dop853,odex,ddeabm})
     if verbose
         warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
-        if !(typeof(prob.f) <: AbstractParameterizedFunction) && isstiff
-            if has_tgrad(prob.f)
+        if !(typeof(prob.f) <: DiffEqBase.AbstractParameterizedFunction) && isstiff
+            if DiffEqBase.has_tgrad(prob.f)
                 warn("Explicit t-gradient given to this stiff solver is ignored.")
                 warned = true
             end
@@ -62,7 +64,7 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
 
     uprev = similar(u)
 
-    sol = build_solution(prob,  alg, ts, _timeseries,
+    sol = DiffEqBase.build_solution(prob,  alg, ts, _timeseries,
                          timeseries_errors = timeseries_errors,
                          calculate_error = false,
                          retcode = :Default)
@@ -98,7 +100,7 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
             error("This solver must use full or banded mass matrices.")
         end
     end
-    if has_jac(prob.f)
+    if DiffEqBase.has_jac(prob.f)
         dict[:JACOBIMATRIX] = (t,u,J) -> prob.f(Val{:jac},J,u,prob.p,t)
     end
 
@@ -158,13 +160,13 @@ function solve{uType,tType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         return_retcode = :Success
     end
 
-    if has_analytic(prob.f)
-        calculate_solution_errors!(integrator.sol;
+    if DiffEqBase.has_analytic(prob.f)
+        DiffEqBase.calculate_solution_errors!(integrator.sol;
         timeseries_errors=timeseries_errors,
         dense_errors=dense_errors)
     end
 
-    solution_new_retcode(sol,return_retcode)
+    DiffEqBase.solution_new_retcode(sol,return_retcode)
 end
 
 function save_value!(_timeseries,u,::Type{T},sizeu) where T<:Number
