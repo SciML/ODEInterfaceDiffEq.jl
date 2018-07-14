@@ -1,4 +1,4 @@
-function solve(
+function DiffEqBase.__solve(
     prob::DiffEqBase.AbstractODEProblem{uType,tuptType,isinplace},
     alg::AlgType,
     timeseries=[],ts=[],ks=[];
