@@ -4,7 +4,7 @@ function solve(
     timeseries=[],ts=[],ks=[];
     saveat = Float64[],
     verbose=true,save_everystep = isempty(saveat),
-    save_start=true,
+    save_start = save_everystep || isempty(saveat) || typeof(saveat) <: Number ? true : prob.tspan[1] in saveat,
     timeseries_errors=true,dense_errors=false,
     callback=nothing,kwargs...) where
     {uType,tuptType,isinplace,AlgType<:ODEInterfaceAlgorithm}
