@@ -1,4 +1,4 @@
-using ODEInterfaceDiffEq, Base.Test
+using ODEInterfaceDiffEq, Test
 
 callback_f = function (du,u,p,t)
   du[1] = u[2]

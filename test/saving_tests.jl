@@ -1,5 +1,8 @@
 using ODEInterfaceDiffEq, DiffEqProblemLibrary, DiffEqBase
-using Base.Test
+using Test
+
+using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
+import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_linear
 
 prob = prob_ode_linear
 sol =solve(prob,dopri5(),dt=1//2^(4))

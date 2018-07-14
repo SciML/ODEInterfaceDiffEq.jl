@@ -6,6 +6,7 @@ using Reexport
 @reexport using DiffEqBase
 
 using ODEInterface, Compat, DataStructures, FunctionWrappers, Roots
+using LinearAlgebra
 
 import DiffEqBase: solve
 
@@ -14,7 +15,7 @@ const warnkeywords =
      :calck, :progress, :timeseries_steps, :dense,:save_start)
 
 function __init__()
-    const global warnlist = Set(warnkeywords)
+    global warnlist = Set(warnkeywords)
 end
 
 @compat const KW = Dict{Symbol,Any}

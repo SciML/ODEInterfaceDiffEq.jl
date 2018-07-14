@@ -1,5 +1,5 @@
 using ODEInterfaceDiffEq, DiffEqProblemLibrary, DiffEqBase
-using Base.Test
+using Test
 
 @time @testset "Algorithms" begin include("algorithm_tests.jl") end
 @time @testset "Saving" begin include("saving_tests.jl") end

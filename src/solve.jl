@@ -1,4 +1,4 @@
-function solve{uType,tuptType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
+function solve(
     prob::DiffEqBase.AbstractODEProblem{uType,tuptType,isinplace},
     alg::AlgType,
     timeseries=[],ts=[],ks=[];
@@ -6,7 +6,8 @@ function solve{uType,tuptType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     verbose=true,save_everystep = isempty(saveat),
     save_start=true,
     timeseries_errors=true,dense_errors=false,
-    callback=nothing,kwargs...)
+    callback=nothing,kwargs...) where
+    {uType,tuptType,isinplace,AlgType<:ODEInterfaceAlgorithm}
 
     tType = eltype(tuptType)
 
@@ -15,7 +16,7 @@ function solve{uType,tuptType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
         warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
         if !(typeof(prob.f) <: DiffEqBase.AbstractParameterizedFunction) && isstiff
             if DiffEqBase.has_tgrad(prob.f)
-                warn("Explicit t-gradient given to this stiff solver is ignored.")
+                @warn("Explicit t-gradient given to this stiff solver is ignored.")
                 warned = true
             end
         end
@@ -55,8 +56,8 @@ function solve{uType,tuptType,isinplace,AlgType<:ODEInterfaceAlgorithm}(
     o[:RHS_CALLMODE] = ODEInterface.RHS_CALL_INSITU
 
     if save_everystep
-        _timeseries = Vector{uType}(0)
-        ts = Vector{tType}(0)
+        _timeseries = Vector{uType}(undef,0)
+        ts = Vector{tType}(undef,0)
     else
         _timeseries = [copy(u0)]
         ts = [tspan[1]]

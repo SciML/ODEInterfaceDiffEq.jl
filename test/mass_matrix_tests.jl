@@ -1,5 +1,8 @@
 using ODEInterfaceDiffEq, DiffEqProblemLibrary, DiffEqBase
-using Base.Test
+using Test
+
+using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
+import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_mm_linear
 
 prob = prob_ode_mm_linear
 

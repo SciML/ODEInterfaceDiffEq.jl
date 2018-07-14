@@ -1,5 +1,5 @@
 using ODEInterfaceDiffEq, DiffEqProblemLibrary, DiffEqBase
-using Base.Test
+using Test
 
 jac_called = false
 
