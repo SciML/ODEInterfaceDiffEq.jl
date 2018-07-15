@@ -18,7 +18,7 @@ function __init__()
     global warnlist = Set(warnkeywords)
 end
 
-@compat const KW = Dict{Symbol,Any}
+const KW = Dict{Symbol,Any}
 
 include("algorithms.jl")
 include("integrator_types.jl")
