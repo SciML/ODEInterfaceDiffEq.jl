@@ -1,6 +1,6 @@
 # ODEInterface.jl Algorithms
 
-@compat abstract type ODEInterfaceAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
+abstract type ODEInterfaceAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 struct dopri5 <: ODEInterfaceAlgorithm end
 struct dop853 <: ODEInterfaceAlgorithm end
 struct odex <: ODEInterfaceAlgorithm end

@@ -79,7 +79,7 @@ function DiffEqBase.__solve(
     o[:OUTPUTFCN] = outputfcn
     if !(typeof(callbacks_internal.continuous_callbacks)<:Tuple{}) || !isempty(saveat)
         if typeof(alg) <: Union{ddeabm,ddebdf}
-            warn("saveat and continuous callbacks ignored for ddeabm and ddebdf")
+            @warn("saveat and continuous callbacks ignored for ddeabm and ddebdf")
             o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_WODENSE
         else
             o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_DENSE
@@ -145,16 +145,16 @@ function DiffEqBase.__solve(
 
     if retcode < 0
         if retcode == -1
-            verbose && warn("Input is not consistent.")
+            verbose && @warn("Input is not consistent.")
             return_retcode = :Failure
         elseif retcode == -2
-            verbose && warn("Interrupted. Larger maxiters is needed.")
+            verbose && @warn("Interrupted. Larger maxiters is needed.")
             return_retcode = :MaxIters
         elseif retcode == -3
-            verbose && warn("Step size went too small.")
+            verbose && @warn("Step size went too small.")
             return_retcode = :DtLessThanMin
         elseif retcode == -4
-            verbose && warn("Interrupted. Problem is probably stiff.")
+            verbose && @warn("Interrupted. Problem is probably stiff.")
             return_retcode = :Unstable
         end
     else
