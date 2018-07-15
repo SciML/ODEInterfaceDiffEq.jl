@@ -20,6 +20,6 @@ sol =solve(prob,radau5();dt=1//2^(4))
 
 sol =solve(prob,rodas();dt=1//2^(4))
 
-@test_throws ErrorException sol =solve(prob,ddeabm();dt=1//2^(4))
+@test_throws ErrorException solve(prob,ddeabm();dt=1//2^(4))
 
 sol =solve(prob,ddebdf();dt=1//2^(4))

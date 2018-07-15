@@ -102,7 +102,7 @@ function DiffEqBase.__solve(
         end
     end
     if DiffEqBase.has_jac(prob.f)
-        dict[:JACOBIMATRIX] = (t,u,J) -> prob.f(Val{:jac},J,u,prob.p,t)
+        dict[:JACOBIMATRIX] = (t,u,J) -> prob.f.jac(J,u,prob.p,t)
     end
 
     # Convert to the strings

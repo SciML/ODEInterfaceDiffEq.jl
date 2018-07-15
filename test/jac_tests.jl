@@ -9,7 +9,7 @@ function Lotka(du,u,p,t)
   nothing
 end
 
-function Lotka(::Type{Val{:jac}},J,u,p,t)
+function Lotka_jac(J,u,p,t)
   global jac_called
   jac_called = true
   J[1,1] = 1.0 - u[2]
@@ -19,7 +19,7 @@ function Lotka(::Type{Val{:jac}},J,u,p,t)
   nothing
 end
 
-prob = ODEProblem(Lotka,ones(2),(0.0,2.0))
+prob = ODEProblem(ODEFunction(Lotka,jac=Lotka_jac),ones(2),(0.0,2.0))
 
 sol =solve(prob,radau5();dt=1//2^(4))
 
