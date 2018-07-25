@@ -92,9 +92,9 @@ function DiffEqBase.__solve(
                         ODEINTERFACE_OPTION_LIST,
                         ODEINTERFACE_ALIASES,
                         ODEINTERFACE_ALIASES_REVERSED)
-    if prob.mass_matrix != I
-        if typeof(prob.mass_matrix) <: Matrix && isstiff
-            dict[:MASSMATRIX] = prob.mass_matrix
+    if prob.f.mass_matrix != I
+        if typeof(prob.f.mass_matrix) <: Matrix && isstiff
+            dict[:MASSMATRIX] = prob.f.mass_matrix
         elseif !isstiff
             error("This solver does not support mass matrices")
         else
