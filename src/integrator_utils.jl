@@ -11,10 +11,10 @@ function handle_callbacks!(integrator,eval_sol_fcn)
     time,upcrossing,event_occured,idx,counter =
               find_first_continuous_callback(integrator,continuous_callbacks...)
     if event_occured
-      integrator.event_last_time = true
+      integrator.event_last_time = idx
       continuous_modified,saved_in_cb = apply_callback!(integrator,continuous_callbacks[idx],time,upcrossing)
     else
-      integrator.event_last_time = false
+      integrator.event_last_time = 0
     end
   end
   if !(typeof(discrete_callbacks)<:Tuple{})

@@ -22,5 +22,5 @@ prob = ODEProblem(callback_f,u0,tspan)
 
 sol = solve(prob,dopri5(),callback=callback,dtmax=0.5)
 @test sol(4.0)[1] > 0
-sol = solve(prob,dopri5(),callback=callback)
-@test sol(4.0)[1] > 0
+sol = solve(prob,dopri5(),callback=callback,save_everystep=true)
+@test sol(4.0)[1] > -1e-12
