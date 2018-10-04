@@ -28,18 +28,20 @@ function handle_callbacks!(integrator,eval_sol_fcn)
 end
 
 function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,force_save=false)
-  uType = eltype(integrator.sol.u)
+  if integrator.opts.save_on
+    uType = eltype(integrator.sol.u)
 
-  if integrator.opts.save_everystep || force_save
-      push!(integrator.sol.t,integrator.t)
-      save_value!(integrator.sol.u,copy(integrator.u),uType,integrator.sizeu)
-  end
+    if integrator.opts.save_everystep || force_save
+        push!(integrator.sol.t,integrator.t)
+        save_value!(integrator.sol.u,copy(integrator.u),uType,integrator.sizeu)
+    end
 
-  while !isempty(integrator.opts.saveat) &&
-      integrator.tdir*top(integrator.opts.saveat) < integrator.tdir*integrator.t
-      curt = pop!(integrator.opts.saveat)
-      tmp = integrator(curt)::Vector{Float64}
-      push!(integrator.sol.t,curt)
-      save_value!(integrator.sol.u,tmp,uType,integrator.sizeu)
+    while !isempty(integrator.opts.saveat) &&
+        integrator.tdir*top(integrator.opts.saveat) < integrator.tdir*integrator.t
+        curt = pop!(integrator.opts.saveat)
+        tmp = integrator(curt)::Vector{Float64}
+        push!(integrator.sol.t,curt)
+        save_value!(integrator.sol.u,tmp,uType,integrator.sizeu)
+    end
   end
 end

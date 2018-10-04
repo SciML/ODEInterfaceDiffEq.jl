@@ -14,3 +14,6 @@ sol =solve(prob,dopri5(),save_everystep=false)
 
 sol =solve(prob,dopri5(),saveat = 0.1)
 @test sol.t == collect(0:0.1:1)
+
+sol = solve(prob,dopri5(),save_on=false,save_start=false)
+@test isempty(sol.t) && isempty(sol.u)

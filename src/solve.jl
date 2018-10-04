@@ -4,6 +4,7 @@ function DiffEqBase.__solve(
     timeseries=[],ts=[],ks=[];
     saveat = Float64[],
     verbose=true,save_everystep = isempty(saveat),
+    save_on = true,
     save_start = save_everystep || isempty(saveat) || typeof(saveat) <: Number ? true : prob.tspan[1] in saveat,
     timeseries_errors=true,dense_errors=false,
     callback=nothing,kwargs...) where
@@ -70,7 +71,7 @@ function DiffEqBase.__solve(
                          calculate_error = false,
                          retcode = :Default)
 
-    opts = DEOptions(saveat_internal,save_everystep,callbacks_internal)
+    opts = DEOptions(saveat_internal,save_on,save_everystep,callbacks_internal)
     integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],opts,
                                         false,tdir,sizeu,sol,
                                         (t)->[t],0)
