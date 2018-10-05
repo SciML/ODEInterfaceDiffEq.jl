@@ -1,5 +1,6 @@
 mutable struct DEOptions{SType,CType}
     saveat::SType
+    save_on::Bool
     save_everystep::Bool
     callback::CType
 end
