@@ -20,4 +20,8 @@ mutable struct ODEInterfaceIntegrator{uType,uPrevType,oType,SType,solType,algTyp
     alg::algType
 end
 
-(integrator::ODEInterfaceIntegrator)(t) = integrator.eval_sol_fcn(t)
+@inline function (integrator::ODEInterfaceIntegrator)(t,deriv::Type{Val{N}}=Val{0};idxs=nothing) where N
+  @assert N==0 "ODEInterface does not support dense derivative"
+  sol = integrator.eval_sol_fcn(t)
+  return idxs == nothing ? sol : sol[idxs]
+end
