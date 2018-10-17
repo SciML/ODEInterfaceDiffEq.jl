@@ -45,3 +45,17 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,force_save=fa
     end
   end
 end
+
+DiffEqBase.isnative(i::ODEInterfaceIntegrator) = false
+
+function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrator,t)
+  integrator.t = t
+  tmp = integrator(integrator.t)::Vector{Float64}
+  if eltype(integrator.sol.u) <: Vector
+      integrator.u .= tmp
+  else
+      integrator.u .= reshape(tmp,integrator.sizeu)
+  end
+  nothing
+end
+DiffEqBase.get_tmp_cache(i::ODEInterfaceIntegrator,args...) = nothing
