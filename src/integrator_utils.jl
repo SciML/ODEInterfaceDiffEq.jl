@@ -59,3 +59,11 @@ function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrat
   nothing
 end
 DiffEqBase.get_tmp_cache(i::ODEInterfaceIntegrator,args...) = nothing
+
+@inline function Base.getproperty(integrator::ODEInterfaceIntegrator, sym::Symbol)
+  if sym == :dt
+    return integrator.t-integrator.tprev
+  else
+    return getfield(integrator, sym)
+  end
+end
