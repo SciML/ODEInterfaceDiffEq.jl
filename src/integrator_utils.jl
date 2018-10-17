@@ -46,8 +46,6 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,force_save=fa
   end
 end
 
-DiffEqBase.isnative(i::ODEInterfaceIntegrator) = false
-
 function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrator,t)
   integrator.t = t
   tmp = integrator(integrator.t)::Vector{Float64}
