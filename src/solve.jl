@@ -74,7 +74,7 @@ function DiffEqBase.__solve(
     opts = DEOptions(saveat_internal,save_on,save_everystep,callbacks_internal)
     integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],opts,
                                         false,tdir,sizeu,sol,
-                                        (t)->[t],0)
+                                        (t)->[t],0,alg)
 
     outputfcn = OutputFunction(integrator)
     o[:OUTPUTFCN] = outputfcn
