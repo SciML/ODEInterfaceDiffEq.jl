@@ -18,6 +18,7 @@ mutable struct ODEInterfaceIntegrator{uType,uPrevType,oType,SType,solType,algTyp
     eval_sol_fcn
     event_last_time::Int
     alg::algType
+    last_event_error::Float64
 end
 
 @inline function (integrator::ODEInterfaceIntegrator)(t,deriv::Type{Val{N}}=Val{0};idxs=nothing) where N
