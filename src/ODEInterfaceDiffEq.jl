@@ -5,7 +5,7 @@ module ODEInterfaceDiffEq
 using Reexport
 @reexport using DiffEqBase
 
-using ODEInterface, Compat, DataStructures, FunctionWrappers, Roots
+using ODEInterface, Compat, DataStructures, FunctionWrappers
 using LinearAlgebra
 
 import DiffEqBase: solve
