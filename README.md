@@ -20,6 +20,14 @@ A standard installation on MacOSX and Linux should work. On Windows, you need to
 C:\Program Files\mingw-w64\x86_64-6.1.0-posix-seh-rt_v5-rev0\mingw64\bin
 ```
 
+Note that it is required that you add ODEInterface.jl as well;
+
+```julia
+]add ODEInterface
+```
+
+Otherwise you may have issues instantiating the solvers.
+
 ## Common API Usage
 
 This library adds the common interface to ODEInterface.jl's solvers. [See the DifferentialEquations.jl documentation for details on the interface](http://docs.juliadiffeq.org/latest/index.html). Following the Lorenz example from [the ODE tutorial](http://docs.juliadiffeq.org/latest/tutorials/ode_example.html), we can solve this using `dopri5` via the following:
