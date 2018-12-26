@@ -5,7 +5,7 @@ mutable struct DEOptions{SType,CType}
     callback::CType
 end
 
-mutable struct ODEInterfaceIntegrator{algType,IIP,uType,uPrevType,oType,SType,solType} <: DiffEqBase.AbstractODEIntegrator{algType, true, uType, Float64}
+mutable struct ODEInterfaceIntegrator{algType,uType,uPrevType,oType,SType,solType} <: DiffEqBase.AbstractODEIntegrator{algType, true, uType, Float64}
     u::uType
     uprev::uPrevType
     t::Float64
