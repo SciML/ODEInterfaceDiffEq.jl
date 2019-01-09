@@ -202,9 +202,9 @@ function saveat_disc_handling(saveat,tdir,tspan,tType)
   end
 
   if tdir>0
-    saveat_internal = binary_minheap(saveat_vec)
+    saveat_internal = BinaryMinHeap(saveat_vec)
   else
-    saveat_internal = binary_maxheap(saveat_vec)
+    saveat_internal = BinaryMaxHeap(saveat_vec)
   end
 
   saveat_internal
