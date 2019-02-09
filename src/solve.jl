@@ -7,7 +7,7 @@ function DiffEqBase.__solve(
     save_on = true,
     save_start = save_everystep || isempty(saveat) || typeof(saveat) <: Number ? true : prob.tspan[1] in saveat,
     timeseries_errors=true,dense_errors=false,
-    callback=nothing,kwargs...) where
+    callback=nothing, alias_u0=false, kwargs...) where
     {uType,tuptType,isinplace,AlgType<:ODEInterfaceAlgorithm}
 
     tType = eltype(tuptType)
@@ -35,7 +35,11 @@ function DiffEqBase.__solve(
     if typeof(u0) <: Number
         u = [u0]
     else
-        u = deepcopy(u0)
+        if alias_u0
+            u = u0
+        else
+            u = deepcopy(u0)
+        end
     end
 
     tdir = sign(tspan[2]-tspan[1])
