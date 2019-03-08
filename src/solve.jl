@@ -172,6 +172,18 @@ function DiffEqBase.__solve(
         dense_errors=dense_errors)
     end
 
+    destats = sol.destats
+    destats.nf = stats["no_rhs_calls"]
+    if haskey(stats,"no_steps_rejected")
+        destats.nreject = stats["no_steps_rejected"]
+        destats.naccept = stats["no_steps_accepted"]
+    end
+    if haskey(stats,"no_jac_calls")
+        destats.njacs = stats["no_jac_calls"]
+    end
+    if haskey(stats,"no_lu_decomp")
+        destats.nw = stats["no_lu_decomp"]
+    end
     DiffEqBase.solution_new_retcode(sol,return_retcode)
 end
 
