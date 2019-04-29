@@ -12,7 +12,7 @@ function DiffEqBase.__solve(
 
     tType = eltype(tuptType)
 
-    isstiff = !(typeof(alg) <: Union{dopri5,dop853,odex,ddeabm})
+    isstiff = alg isa ODEInterfaceImplicitAlgorithm
     if verbose
         warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
         if !(typeof(prob.f) <: DiffEqBase.AbstractParameterizedFunction) && isstiff
@@ -108,6 +108,10 @@ function DiffEqBase.__solve(
     end
     if DiffEqBase.has_jac(prob.f)
         dict[:JACOBIMATRIX] = (t,u,J) -> prob.f.jac(J,u,prob.p,t)
+    end
+
+    if isstiff && alg.jac_lower !== nothing
+        dict[:JACOBIBANDSSTRUCT] = (alg.jac_lower,alg.jac_upper)
     end
 
     # Convert to the strings
