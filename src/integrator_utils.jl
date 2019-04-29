@@ -69,3 +69,7 @@ DiffEqBase.get_tmp_cache(i::ODEInterfaceIntegrator,args...) = nothing
     return getfield(integrator, sym)
   end
 end
+
+@inline function DiffEqBase.u_modified!(integrator::ODEInterfaceIntegrator,bool::Bool)
+  integrator.u_modified = bool
+end
