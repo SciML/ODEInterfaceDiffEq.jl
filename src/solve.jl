@@ -70,6 +70,7 @@ function DiffEqBase.__solve(
     integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],prob.p,opts,
                                         false,tdir,sizeu,sol,
                                         (t)->[t],0,alg,0.)
+    initialize_callbacks!(integrator)
 
     if !isinplace && typeof(u)<:AbstractArray
         f! = (t,u,du) -> (du[:] = vec(prob.f(reshape(u,sizeu),integrator.p,t)); nothing)
@@ -120,31 +121,31 @@ function DiffEqBase.__solve(
 
     if typeof(alg) <: dopri5
         tend, uend, retcode, stats =
-            ODEInterface.dopri5(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.dopri5(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     elseif typeof(alg) <: dop853
         tend, uend, retcode, stats =
-            ODEInterface.dop853(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.dop853(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     elseif typeof(alg) <: odex
         tend, uend, retcode, stats =
-            ODEInterface.odex(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.odex(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     elseif typeof(alg) <: seulex
         tend, uend, retcode, stats =
-            ODEInterface.seulex(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.seulex(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     elseif typeof(alg) <: radau
         tend, uend, retcode, stats =
-            ODEInterface.radau(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.radau(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     elseif typeof(alg) <: radau5
         tend, uend, retcode, stats =
-            ODEInterface.radau5(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.radau5(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     elseif typeof(alg) <: rodas
         tend, uend, retcode, stats =
-            ODEInterface.rodas(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.rodas(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     elseif typeof(alg) <: ddeabm
         tend, uend, retcode, stats =
-            ODEInterface.ddeabm(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.ddeabm(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     elseif typeof(alg) <: ddebdf
         tend, uend, retcode, stats =
-            ODEInterface.ddebdf(f!, tspan[1], tspan[2], vec(u), opts)
+            ODEInterface.ddebdf(f!, tspan[1], tspan[2], vec(integrator.u), opts)
     end
 
     if !save_everystep
