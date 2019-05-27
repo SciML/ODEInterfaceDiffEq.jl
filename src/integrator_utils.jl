@@ -73,3 +73,24 @@ end
 @inline function DiffEqBase.u_modified!(integrator::ODEInterfaceIntegrator,bool::Bool)
   integrator.u_modified = bool
 end
+
+function initialize_callbacks!(integrator, initialize_save = true)
+  t = integrator.t
+  u = integrator.u
+  callbacks = integrator.opts.callback
+  integrator.u_modified = true
+
+  u_modified = initialize!(callbacks,u,t,integrator)
+
+  # if the user modifies u, we need to fix current values
+  if u_modified
+    if initialize_save &&
+      (any((c)->c.save_positions[2],callbacks.discrete_callbacks) ||
+      any((c)->c.save_positions[2],callbacks.continuous_callbacks))
+      savevalues!(integrator,true)
+    end
+  end
+
+  # reset this as it is now handled so the integrators should proceed as normal
+  integrator.u_modified = false
+end
