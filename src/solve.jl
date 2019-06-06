@@ -26,6 +26,13 @@ function DiffEqBase.__solve(
 
     callbacks_internal = CallbackSet(callback,prob.callback)
 
+    max_len_cb = DiffEqBase.max_vector_callback_length(callbacks_internal)
+    if max_len_cb isa VectorContinuousCallback
+      callback_cache = DiffEqBase.CallbackCache(max_len_cb.len,uBottomEltype,uBottomEltype)
+    else
+      callback_cache = nothing
+    end
+
     tspan = prob.tspan
 
     o = KW(kwargs)
@@ -69,7 +76,7 @@ function DiffEqBase.__solve(
     opts = DEOptions(saveat_internal,save_on,save_everystep,callbacks_internal)
     integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],prob.p,opts,
                                         false,tdir,sizeu,sol,
-                                        (t)->[t],0,alg,0.)
+                                        (t)->[t],0,1,callback_cache,alg,0.)
     initialize_callbacks!(integrator)
 
     if !isinplace && typeof(u)<:AbstractArray

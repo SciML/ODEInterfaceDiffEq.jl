@@ -5,7 +5,7 @@ mutable struct DEOptions{SType,CType}
     callback::CType
 end
 
-mutable struct ODEInterfaceIntegrator{algType,uType,uPrevType,oType,SType,solType,P} <: DiffEqBase.AbstractODEIntegrator{algType, true, uType, Float64}
+mutable struct ODEInterfaceIntegrator{algType,uType,uPrevType,oType,SType,solType,P,CallbackCacheType} <: DiffEqBase.AbstractODEIntegrator{algType, true, uType, Float64}
     u::uType
     uprev::uPrevType
     t::Float64
@@ -18,6 +18,8 @@ mutable struct ODEInterfaceIntegrator{algType,uType,uPrevType,oType,SType,solTyp
     sol::solType
     eval_sol_fcn
     event_last_time::Int
+    vector_event_last_time::Int
+    callback_cache::CallbackCacheType
     alg::algType
     last_event_error::Float64
 end
