@@ -71,6 +71,7 @@ function DiffEqBase.__solve(
     sol = DiffEqBase.build_solution(prob,  alg, ts, _timeseries,
                          timeseries_errors = timeseries_errors,
                          calculate_error = false,
+                         destats = DiffEqBase.DEStats(0),
                          retcode = :Default)
 
     opts = DEOptions(saveat_internal,save_on,save_everystep,callbacks_internal)
