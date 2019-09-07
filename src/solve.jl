@@ -24,7 +24,7 @@ function DiffEqBase.__solve(
         warned && warn_compat()
     end
 
-    callbacks_internal = CallbackSet(callback,prob.callback)
+    callbacks_internal = CallbackSet(callback)
 
     max_len_cb = DiffEqBase.max_vector_callback_length(callbacks_internal)
     if max_len_cb isa VectorContinuousCallback
