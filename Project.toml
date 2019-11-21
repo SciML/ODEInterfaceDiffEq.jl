@@ -13,12 +13,13 @@ ODEInterface = "54ca160b-1b9f-5127-a996-1867f4bc2a2c"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
-julia = "1"
+Compat = "3.0"
 DiffEqBase = "6"
+julia = "1"
 
 [extras]
 DiffEqProblemLibrary = "a077e3f3-b75c-5d7f-a0c6-6bc4c8ec64a9"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test","DiffEqProblemLibrary"]
+test = ["Test", "DiffEqProblemLibrary"]
