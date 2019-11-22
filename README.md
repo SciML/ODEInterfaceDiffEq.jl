@@ -27,7 +27,7 @@ Otherwise you may have issues instantiating the solvers.
 
 ## Common API Usage
 
-This library adds the common interface to ODEInterface.jl's solvers. [See the DifferentialEquations.jl documentation for details on the interface](http://docs.juliadiffeq.org/dev/index.html). Following the Lorenz example from [the ODE tutorial](http://docs.juliadiffeq.org/latest/dev/ode_example.html), we can solve this using `dopri5` via the following:
+This library adds the common interface to ODEInterface.jl's solvers. [See the DifferentialEquations.jl documentation for details on the interface](http://docs.juliadiffeq.org/dev/index.html). Following the Lorenz example from [the ODE tutorial](http://docs.juliadiffeq.org/dev/dev/ode_example.html), we can solve this using `dopri5` via the following:
 
 ```julia
 using ODEInterfaceDiffEq
