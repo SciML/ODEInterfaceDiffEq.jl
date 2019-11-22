@@ -17,7 +17,7 @@ DataStructures = "0.17"
 DiffEqBase = "6"
 Reexport = "0.2"
 FunctionWrappers = "1.0"
-Compat = "3.0"
+Compat = "2.2, 3.0"
 ODEInterface = "0.4"
 julia = "1"
 
