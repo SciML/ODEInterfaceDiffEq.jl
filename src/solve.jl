@@ -75,11 +75,6 @@ function DiffEqBase.__solve(
                          retcode = :Default)
 
     opts = DEOptions(saveat_internal,save_on,save_everystep,callbacks_internal)
-    integrator = ODEInterfaceIntegrator(u,uprev,tspan[1],tspan[1],prob.p,opts,
-                                        false,tdir,sizeu,sol,
-                                        (t)->[t],0,1,callback_cache,alg,0.)
-    initialize_callbacks!(integrator)
-
     if !isinplace && typeof(u)<:AbstractArray
         f! = (t,u,du) -> (du[:] = vec(prob.f(reshape(u,sizeu),integrator.p,t)); nothing)
     elseif !(typeof(u)<:Vector{Float64})
@@ -88,6 +83,11 @@ function DiffEqBase.__solve(
     else
         f! = (t,u,du) -> prob.f(du,u,integrator.p,t)
     end
+
+    integrator = ODEInterfaceIntegrator(prob.f,u,uprev,tspan[1],tspan[1],prob.p,opts,
+                                        false,tdir,sizeu,sol,
+                                        (t)->[t],0,1,callback_cache,alg,0.)
+    initialize_callbacks!(integrator)
 
     outputfcn = OutputFunction(integrator)
     o[:OUTPUTFCN] = outputfcn
