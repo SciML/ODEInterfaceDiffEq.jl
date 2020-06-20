@@ -30,7 +30,7 @@ Otherwise you may have issues instantiating the solvers.
 This library adds the common interface to ODEInterface.jl's solvers. [See the DifferentialEquations.jl documentation for details on the interface](http://docs.juliadiffeq.org/dev/index.html). Following the Lorenz example from [the ODE tutorial](http://docs.juliadiffeq.org/dev/dev/ode_example.html), we can solve this using `dopri5` via the following:
 
 ```julia
-using ODEInterfaceDiffEq
+using ODEInterface, ODEInterfaceDiffEq
 function lorenz(du,u,p,t)
  du[1] = 10.0(u[2]-u[1])
  du[2] = u[1]*(28.0-u[3]) - u[2]
