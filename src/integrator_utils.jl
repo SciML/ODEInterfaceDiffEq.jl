@@ -41,7 +41,7 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,force_save=fa
   end
 
   while !isempty(integrator.opts.saveat) &&
-    integrator.tdir*top(integrator.opts.saveat) < integrator.tdir*integrator.t
+    integrator.tdir * first(integrator.opts.saveat) < integrator.tdir*integrator.t
     saved = true
     curt = pop!(integrator.opts.saveat)
     tmp = integrator(curt)::Vector{Float64}
