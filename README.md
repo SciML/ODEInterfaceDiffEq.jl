@@ -7,7 +7,7 @@
 
 This package contains bindings for ODEInterface.jl to allow it to be used with the
 JuliaDiffEq common interface. For more information on using the solvers from this
-package, see the [DifferentialEquations.jl documentation](https://juliadiffeq.github.io/DiffEqDocs.jl/dev/).
+package, see the [DifferentialEquations.jl documentation](https://diffeq.sciml.ai/latest/).
 
 ## Installation
 
