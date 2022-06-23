@@ -10,15 +10,14 @@ using LinearAlgebra
 
 import DiffEqBase: solve
 
-const warnkeywords =
-    (:save_idxs, :d_discontinuities, :unstable_check, :tstops,
-     :calck, :progress, :dense,:save_start)
+const warnkeywords = (:save_idxs, :d_discontinuities, :unstable_check, :tstops,
+                      :calck, :progress, :dense, :save_start)
 
 function __init__()
     global warnlist = Set(warnkeywords)
 end
 
-const KW = Dict{Symbol,Any}
+const KW = Dict{Symbol, Any}
 
 include("algorithms.jl")
 include("integrator_types.jl")
