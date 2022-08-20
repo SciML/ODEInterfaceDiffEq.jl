@@ -1,4 +1,4 @@
-using ODEInterfaceDiffEq, DiffEqProblemLibrary, DiffEqBase
+using ODEInterfaceDiffEq, DiffEqBase
 using Test
 
 @time @testset "Algorithms" begin include("algorithm_tests.jl") end
