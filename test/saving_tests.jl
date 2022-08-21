@@ -1,4 +1,4 @@
-using ODEInterfaceDiffEq, DiffEqProblemLibrary, DiffEqBase
+using ODEInterfaceDiffEq, DiffEqBase
 using Test
 import ODEProblemLibrary: prob_ode_linear
 
