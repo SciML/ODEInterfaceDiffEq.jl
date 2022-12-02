@@ -7,7 +7,7 @@
 
 This package contains bindings for ODEInterface.jl to allow it to be used with the
 JuliaDiffEq common interface. For more information on using the solvers from this
-package, see the [DifferentialEquations.jl documentation](https://diffeq.sciml.ai/latest/).
+package, see the [DifferentialEquations.jl documentation](https://docs.sciml.ai/DiffEqDocs/stable/).
 
 ## Installation
 
@@ -27,7 +27,7 @@ Otherwise you may have issues instantiating the solvers.
 
 ## Common API Usage
 
-This library adds the common interface to ODEInterface.jl's solvers. [See the DifferentialEquations.jl documentation for details on the interface](http://docs.juliadiffeq.org/dev/index.html). Following the Lorenz example from [the ODE tutorial](http://docs.juliadiffeq.org/dev/dev/ode_example.html), we can solve this using `dopri5` via the following:
+This library adds the common interface to ODEInterface.jl's solvers. [See the DifferentialEquations.jl documentation for details on the interface](https://docs.sciml.ai/DiffEqDocs/stable/). Following the Lorenz example from [the ODE tutorial](https://docs.sciml.ai/DiffEqDocs/stable/tutorials/ode_example/), we can solve this using `dopri5` via the following:
 
 ```julia
 using ODEInterface, ODEInterfaceDiffEq
@@ -43,4 +43,4 @@ sol = solve(prob,dopri5(),abstol=1e-4)
 using Plots; plot(sol,vars=(1,2,3))
 ```
 
-The options available in `solve` are documented [at the common solver options page](http://docs.juliadiffeq.org/dev/basics/common_solver_opts.html). The available methods are documented [at the ODE solvers page](http://docs.juliadiffeq.org/dev/solvers/ode_solve.html#ODEInterface.jl-1).
+The options available in `solve` are documented [at the common solver options page](https://docs.sciml.ai/DiffEqDocs/stable/basics/common_solver_opts/). The available methods are documented [at the ODE solvers page](https://docs.sciml.ai/DiffEqDocs/stable/solvers/ode_solve/).
