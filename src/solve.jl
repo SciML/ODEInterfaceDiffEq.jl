@@ -73,7 +73,7 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
                                     timeseries_errors = timeseries_errors,
                                     calculate_error = false,
                                     destats = DiffEqBase.DEStats(0),
-                                    retcode = :Default)
+                                    retcode = ReturnCode.Default)
 
     opts = DEOptions(saveat_internal, save_on, save_everystep, callbacks_internal)
     if !isinplace && typeof(u) <: AbstractArray
@@ -165,19 +165,19 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
     if retcode < 0
         if retcode == -1
             verbose && @warn("Input is not consistent.")
-            return_retcode = :Failure
+            return_retcode = ReturnCode.Failure
         elseif retcode == -2
             verbose && @warn("Interrupted. Larger maxiters is needed.")
-            return_retcode = :MaxIters
+            return_retcode = ReturnCode.MaxIters
         elseif retcode == -3
             verbose && @warn("Step size went too small.")
-            return_retcode = :DtLessThanMin
+            return_retcode = ReturnCode.DtLessThanMin
         elseif retcode == -4
             verbose && @warn("Interrupted. Problem is probably stiff.")
-            return_retcode = :Unstable
+            return_retcode = ReturnCode.Unstable
         end
     else
-        return_retcode = :Success
+        return_retcode = ReturnCode.Success
     end
 
     if DiffEqBase.has_analytic(prob.f)
