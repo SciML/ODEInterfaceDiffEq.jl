@@ -72,7 +72,7 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
     sol = DiffEqBase.build_solution(prob, alg, ts, _timeseries,
                                     timeseries_errors = timeseries_errors,
                                     calculate_error = false,
-                                    destats = DiffEqBase.DEStats(0),
+                                    stats = DiffEqBase.Stats(0),
                                     retcode = ReturnCode.Default)
 
     opts = DEOptions(saveat_internal, save_on, save_everystep, callbacks_internal)
@@ -186,7 +186,7 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
                                               dense_errors = dense_errors)
     end
 
-    destats = sol.destats
+    destats = sol.stats
     destats.nf = stats["no_rhs_calls"]
     if haskey(stats, "no_steps_rejected")
         destats.nreject = stats["no_steps_rejected"]
