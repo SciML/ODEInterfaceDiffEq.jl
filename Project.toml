@@ -1,7 +1,7 @@
 name = "ODEInterfaceDiffEq"
 uuid = "09606e27-ecf5-54fc-bb29-004bd9f985bf"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "3.12.0"
+version = "3.13.0"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
