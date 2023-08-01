@@ -28,7 +28,7 @@ struct seulex{T} <: ODEInterfaceImplicitAlgorithm
     jac_lower::T
     jac_upper::T
 end
-SciMLBase.alg_order(alg::odex) = 12
+SciMLBase.alg_order(alg::seulex) = 12
 
 
 """
