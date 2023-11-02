@@ -5,7 +5,7 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
                             verbose = true, save_everystep = isempty(saveat),
                             save_on = true,
                             save_start = save_everystep || isempty(saveat) ||
-                                             typeof(saveat) <: Number ? true :
+                                             saveat isa Number ? true :
                                          prob.tspan[1] in saveat,
                             timeseries_errors = true, dense_errors = false,
                             callback = nothing, alias_u0 = false,
@@ -16,7 +16,7 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
     isstiff = alg isa ODEInterfaceImplicitAlgorithm
     if verbose
         warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
-        if !(typeof(prob.f) <: DiffEqBase.AbstractParameterizedFunction) && isstiff
+        if !(prob.f isa DiffEqBase.AbstractParameterizedFunction) && isstiff
             if DiffEqBase.has_tgrad(prob.f)
                 @warn("Explicit t-gradient given to this stiff solver is ignored.")
                 warned = true
@@ -41,7 +41,7 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
 
     u0 = prob.u0
 
-    if typeof(u0) <: Number
+    if u0 isa Number
         u = [u0]
     else
         if alias_u0
@@ -76,9 +76,9 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
                                     retcode = ReturnCode.Default)
 
     opts = DEOptions(saveat_internal, save_on, save_everystep, callbacks_internal)
-    if !isinplace && typeof(u) <: AbstractArray
+    if !isinplace && u isa AbstractArray
         f! = (t, u, du) -> (du[:] = vec(prob.f(reshape(u, sizeu), integrator.p, t)); nothing)
-    elseif !(typeof(u) <: Vector{Float64})
+    elseif !(u isa Vector{Float64})
         f! = (t, u, du) -> (prob.f(reshape(du, sizeu), reshape(u, sizeu), integrator.p, t);
                             du = vec(du);
                             nothing)
@@ -93,8 +93,8 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
 
     outputfcn = OutputFunction(integrator)
     o[:OUTPUTFCN] = outputfcn
-    if !(typeof(callbacks_internal.continuous_callbacks) <: Tuple{}) || !isempty(saveat)
-        if typeof(alg) <: Union{ddeabm, ddebdf}
+    if !(callbacks_internal.continuous_callbacks isa Tuple{}) || !isempty(saveat)
+        if alg isa Union{ddeabm, ddebdf}
             @warn("saveat and continuous callbacks ignored for ddeabm and ddebdf")
             o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_WODENSE
         else
@@ -109,7 +109,7 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
                         ODEINTERFACE_ALIASES,
                         ODEINTERFACE_ALIASES_REVERSED)
     if prob.f.mass_matrix != I
-        if typeof(prob.f.mass_matrix) <: Matrix && isstiff
+        if prob.f.mass_matrix isa Matrix && isstiff
             dict[:MASSMATRIX] = prob.f.mass_matrix
         elseif !isstiff
             error("This solver does not support mass matrices")
@@ -128,31 +128,31 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
     # Convert to the strings
     opts = ODEInterface.OptionsODE([Pair(ODEINTERFACE_STRINGS[k], v) for (k, v) in dict]...)
 
-    if typeof(alg) <: dopri5
+    if alg isa dopri5
         tend, uend, retcode, stats = ODEInterface.dopri5(f!, tspan[1], tspan[2],
                                                          vec(integrator.u), opts)
-    elseif typeof(alg) <: dop853
+    elseif alg isa dop853
         tend, uend, retcode, stats = ODEInterface.dop853(f!, tspan[1], tspan[2],
                                                          vec(integrator.u), opts)
-    elseif typeof(alg) <: odex
+    elseif alg isa odex
         tend, uend, retcode, stats = ODEInterface.odex(f!, tspan[1], tspan[2],
                                                        vec(integrator.u), opts)
-    elseif typeof(alg) <: seulex
+    elseif alg isa seulex
         tend, uend, retcode, stats = ODEInterface.seulex(f!, tspan[1], tspan[2],
                                                          vec(integrator.u), opts)
-    elseif typeof(alg) <: radau
+    elseif alg isa radau
         tend, uend, retcode, stats = ODEInterface.radau(f!, tspan[1], tspan[2],
                                                         vec(integrator.u), opts)
-    elseif typeof(alg) <: radau5
+    elseif alg isa radau5
         tend, uend, retcode, stats = ODEInterface.radau5(f!, tspan[1], tspan[2],
                                                          vec(integrator.u), opts)
-    elseif typeof(alg) <: rodas
+    elseif alg isa rodas
         tend, uend, retcode, stats = ODEInterface.rodas(f!, tspan[1], tspan[2],
                                                         vec(integrator.u), opts)
-    elseif typeof(alg) <: ddeabm
+    elseif alg isa ddeabm
         tend, uend, retcode, stats = ODEInterface.ddeabm(f!, tspan[1], tspan[2],
                                                          vec(integrator.u), opts)
-    elseif typeof(alg) <: ddebdf
+    elseif alg isa ddebdf
         tend, uend, retcode, stats = ODEInterface.ddebdf(f!, tspan[1], tspan[2],
                                                          vec(integrator.u), opts)
     end
@@ -220,7 +220,7 @@ function buildOptions(o, optionlist, aliases, aliases_reversed)
 end
 
 function saveat_disc_handling(saveat, tdir, tspan, tType)
-    if typeof(saveat) <: Number
+    if saveat isa Number
         if (tspan[1]:saveat:tspan[end])[end] == tspan[end]
             saveat_vec = convert(Vector{tType},
                                  collect(tType, (tspan[1] + saveat):saveat:tspan[end]))
