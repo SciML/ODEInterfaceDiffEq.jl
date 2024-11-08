@@ -57,7 +57,7 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,
     return saved, savedexactly
 end
 
-function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrator, t)
+function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrator, t, modify_save_endpoint::Type{Val{T}}=Val{false}, reinitialize_alg=nothing) where T
     integrator.t = t
     tmp = integrator(integrator.t)::Vector{Float64}
     if eltype(integrator.sol.u) <: Vector
