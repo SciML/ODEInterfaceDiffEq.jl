@@ -14,7 +14,7 @@ package, see the [DifferentialEquations.jl documentation](https://docs.sciml.ai/
 A standard installation on MacOSX and Linux should work. On Windows, you need to install mingw32 compilers and add them to the path. [MingW32 can be found here](https://sourceforge.net/projects/mingw-w64/). Then add the path to your environment variables. An example path is:
 
 ```
-C:\Program Files\mingw-w64\x86_64-6.1.0-posix-she-rt_v5-rev0\mingw64\bin
+C:\Program Files\mingw-w64\x86_64-6.1.0-posix-seh-rt_v5-rev0\mingw64\bin
 ```
 
 Note that it is required that you add ODEInterface.jl as well;

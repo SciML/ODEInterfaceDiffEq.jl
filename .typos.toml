@@ -71,3 +71,6 @@ MTK = "MTK"
 ODE = "ODE"
 PDE = "PDE"
 SDE = "SDE"
+
+# ODEInterfaceDiffEq specific terms
+seh = "seh"  # Legitimate German pronoun or abbreviation
