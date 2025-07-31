@@ -1,16 +1,17 @@
-function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType, isinplace},
-                            alg::AlgType,
-                            timeseries = [], ts = [], ks = [];
-                            saveat = Float64[],
-                            verbose = true, save_everystep = isempty(saveat),
-                            save_on = true,
-                            save_start = save_everystep || isempty(saveat) ||
-                                             saveat isa Number ? true :
-                                         prob.tspan[1] in saveat,
-                            timeseries_errors = true, dense_errors = false,
-                            callback = nothing, alias_u0 = false,
-                            kwargs...) where
-    {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
+function DiffEqBase.__solve(
+        prob::DiffEqBase.AbstractODEProblem{uType, tuptType, isinplace},
+        alg::AlgType,
+        timeseries = [], ts = [], ks = [];
+        saveat = Float64[],
+        verbose = true, save_everystep = isempty(saveat),
+        save_on = true,
+        save_start = save_everystep || isempty(saveat) ||
+                     saveat isa Number ? true :
+                     prob.tspan[1] in saveat,
+        timeseries_errors = true, dense_errors = false,
+        callback = nothing, alias_u0 = false,
+        kwargs...) where
+        {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
     tType = eltype(tuptType)
 
     isstiff = alg isa ODEInterfaceImplicitAlgorithm
@@ -30,7 +31,7 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
     max_len_cb = DiffEqBase.max_vector_callback_length(callbacks_internal)
     if max_len_cb isa VectorContinuousCallback
         callback_cache = DiffEqBase.CallbackCache(max_len_cb.len, uBottomEltype,
-                                                  uBottomEltype)
+            uBottomEltype)
     else
         callback_cache = nothing
     end
@@ -70,25 +71,28 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
     uprev = similar(u)
 
     sol = DiffEqBase.build_solution(prob, alg, ts, _timeseries,
-                                    timeseries_errors = timeseries_errors,
-                                    calculate_error = false,
-                                    stats = DiffEqBase.Stats(0),
-                                    retcode = ReturnCode.Default)
+        timeseries_errors = timeseries_errors,
+        calculate_error = false,
+        stats = DiffEqBase.Stats(0),
+        retcode = ReturnCode.Default)
 
     opts = DEOptions(saveat_internal, save_on, save_everystep, callbacks_internal)
     if !isinplace && u isa AbstractArray
-        f! = (t, u, du) -> (du[:] = vec(prob.f(reshape(u, sizeu), integrator.p, t)); nothing)
+        f! = (
+            t, u, du) -> (du[:] = vec(prob.f(reshape(u, sizeu), integrator.p, t)); nothing)
     elseif !(u isa Vector{Float64})
-        f! = (t, u, du) -> (prob.f(reshape(du, sizeu), reshape(u, sizeu), integrator.p, t);
-                            du = vec(du);
-                            nothing)
+        f! = (t,
+            u,
+            du) -> (prob.f(reshape(du, sizeu), reshape(u, sizeu), integrator.p, t);
+            du = vec(du);
+            nothing)
     else
         f! = (t, u, du) -> prob.f(du, u, integrator.p, t)
     end
 
     integrator = ODEInterfaceIntegrator(prob.f, u, uprev, tspan[1], tspan[1], prob.p, opts,
-                                        false, tdir, sizeu, sol,
-                                        (t) -> [t], 0, 1, callback_cache, alg, 0.0)
+        false, tdir, sizeu, sol,
+        (t) -> [t], 0, 1, callback_cache, alg, 0.0)
     initialize_callbacks!(integrator)
 
     outputfcn = OutputFunction(integrator)
@@ -105,9 +109,9 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
     end
 
     dict = buildOptions(o,
-                        ODEINTERFACE_OPTION_LIST,
-                        ODEINTERFACE_ALIASES,
-                        ODEINTERFACE_ALIASES_REVERSED)
+        ODEINTERFACE_OPTION_LIST,
+        ODEINTERFACE_ALIASES,
+        ODEINTERFACE_ALIASES_REVERSED)
     if prob.f.mass_matrix != I
         if prob.f.mass_matrix isa Matrix && isstiff
             dict[:MASSMATRIX] = prob.f.mass_matrix
@@ -129,32 +133,47 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
     opts = ODEInterface.OptionsODE([Pair(ODEINTERFACE_STRINGS[k], v) for (k, v) in dict]...)
 
     if alg isa dopri5
-        tend, uend, retcode, stats = ODEInterface.dopri5(f!, tspan[1], tspan[2],
-                                                         vec(integrator.u), opts)
+        tend, uend,
+        retcode,
+        stats = ODEInterface.dopri5(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     elseif alg isa dop853
-        tend, uend, retcode, stats = ODEInterface.dop853(f!, tspan[1], tspan[2],
-                                                         vec(integrator.u), opts)
+        tend, uend,
+        retcode,
+        stats = ODEInterface.dop853(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     elseif alg isa odex
-        tend, uend, retcode, stats = ODEInterface.odex(f!, tspan[1], tspan[2],
-                                                       vec(integrator.u), opts)
+        tend, uend,
+        retcode, stats = ODEInterface.odex(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     elseif alg isa seulex
-        tend, uend, retcode, stats = ODEInterface.seulex(f!, tspan[1], tspan[2],
-                                                         vec(integrator.u), opts)
+        tend, uend,
+        retcode,
+        stats = ODEInterface.seulex(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     elseif alg isa radau
-        tend, uend, retcode, stats = ODEInterface.radau(f!, tspan[1], tspan[2],
-                                                        vec(integrator.u), opts)
+        tend, uend,
+        retcode, stats = ODEInterface.radau(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     elseif alg isa radau5
-        tend, uend, retcode, stats = ODEInterface.radau5(f!, tspan[1], tspan[2],
-                                                         vec(integrator.u), opts)
+        tend, uend,
+        retcode,
+        stats = ODEInterface.radau5(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     elseif alg isa rodas
-        tend, uend, retcode, stats = ODEInterface.rodas(f!, tspan[1], tspan[2],
-                                                        vec(integrator.u), opts)
+        tend, uend,
+        retcode, stats = ODEInterface.rodas(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     elseif alg isa ddeabm
-        tend, uend, retcode, stats = ODEInterface.ddeabm(f!, tspan[1], tspan[2],
-                                                         vec(integrator.u), opts)
+        tend, uend,
+        retcode,
+        stats = ODEInterface.ddeabm(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     elseif alg isa ddebdf
-        tend, uend, retcode, stats = ODEInterface.ddebdf(f!, tspan[1], tspan[2],
-                                                         vec(integrator.u), opts)
+        tend, uend,
+        retcode,
+        stats = ODEInterface.ddebdf(f!, tspan[1], tspan[2],
+            vec(integrator.u), opts)
     end
 
     if !save_everystep
@@ -182,8 +201,8 @@ function DiffEqBase.__solve(prob::DiffEqBase.AbstractODEProblem{uType, tuptType,
 
     if DiffEqBase.has_analytic(prob.f)
         DiffEqBase.calculate_solution_errors!(integrator.sol;
-                                              timeseries_errors = timeseries_errors,
-                                              dense_errors = dense_errors)
+            timeseries_errors = timeseries_errors,
+            dense_errors = dense_errors)
     end
 
     destats = sol.stats
@@ -223,16 +242,16 @@ function saveat_disc_handling(saveat, tdir, tspan, tType)
     if saveat isa Number
         if (tspan[1]:saveat:tspan[end])[end] == tspan[end]
             saveat_vec = convert(Vector{tType},
-                                 collect(tType, (tspan[1] + saveat):saveat:tspan[end]))
+                collect(tType, (tspan[1] + saveat):saveat:tspan[end]))
         else
             saveat_vec = convert(Vector{tType},
-                                 collect(tType,
-                                         (tspan[1] + saveat):saveat:(tspan[end] - saveat)))
+                collect(tType,
+                    (tspan[1] + saveat):saveat:(tspan[end] - saveat)))
         end
     else
         saveat_vec = vec(collect(tType,
-                                 Iterators.filter(x -> tdir * tspan[1] < tdir * x <
-                                                       tdir * tspan[end], saveat)))
+            Iterators.filter(x -> tdir * tspan[1] < tdir * x <
+                                  tdir * tspan[end], saveat)))
     end
 
     if tdir > 0
@@ -245,106 +264,107 @@ function saveat_disc_handling(saveat, tdir, tspan, tType)
 end
 
 const ODEINTERFACE_OPTION_LIST = Set([:RTOL, :ATOL, :OUTPUTFCN, :OUTPUTMODE, :MAXSTEPS,
-                                         :STEST, :EPS, :RHO, :SSMINSEL,
-                                         :SSMAXSEL, :SSBETA, :MAXSS, :INITIALSS,
-                                         :MAXEXCOLUMN, :STEPSIZESEQUENCE,
-                                         :MAXSTABCHECKS, :MAXSTABCHECKLINE,
-                                         :DENSEOUTPUTWOEE, :INTERPOLDEGRE,
-                                         :SSREDUCTION, :SSSELECTPAR1, :SSSELECTPAR2,
-                                         :ORDERDECFRAC, :ORDERINCFRAC,
-                                         :OPT_RHO, :OPT_RHO2, :RHSAUTONOMOUS, :M1, :M2,
-                                         :LAMBDADENSE, :TRANSJTOH,
-                                         :STEPSIZESEQUENCE, :JACRECOMPFACTOR, :MASSMATRIX,
-                                         :JACOBIMATRIX, :JACOBIBANDSSTRUCT,
-                                         :WORKFORRHS, :WORKFORJAC, :WORKFORDEC, :WORKFORSOL,
-                                         :MAXNEWTONITER, :NEWTONSTARTZERO, :NEWTONSTOPCRIT,
-                                         :DIMFIND1VAR,
-                                         :MAXSTAGES, :MINSTAGES, :INITSTAGES,
-                                         :STEPSIZESTRATEGY,
-                                         :FREEZESSLEFT, :FREEZESSRIGHT, :ORDERDECFACTOR,
-                                         :ORDERINCFACTOR, :ORDERDECCSTEPFAC1,
-                                         :ORDERDECSTEPFAC2, :RHS_CALLMODE,
-                                     ])
+    :STEST, :EPS, :RHO, :SSMINSEL,
+    :SSMAXSEL, :SSBETA, :MAXSS, :INITIALSS,
+    :MAXEXCOLUMN, :STEPSIZESEQUENCE,
+    :MAXSTABCHECKS, :MAXSTABCHECKLINE,
+    :DENSEOUTPUTWOEE, :INTERPOLDEGRE,
+    :SSREDUCTION, :SSSELECTPAR1, :SSSELECTPAR2,
+    :ORDERDECFRAC, :ORDERINCFRAC,
+    :OPT_RHO, :OPT_RHO2, :RHSAUTONOMOUS, :M1, :M2,
+    :LAMBDADENSE, :TRANSJTOH,
+    :STEPSIZESEQUENCE, :JACRECOMPFACTOR, :MASSMATRIX,
+    :JACOBIMATRIX, :JACOBIBANDSSTRUCT,
+    :WORKFORRHS, :WORKFORJAC, :WORKFORDEC, :WORKFORSOL,
+    :MAXNEWTONITER, :NEWTONSTARTZERO, :NEWTONSTOPCRIT,
+    :DIMFIND1VAR,
+    :MAXSTAGES, :MINSTAGES, :INITSTAGES,
+    :STEPSIZESTRATEGY,
+    :FREEZESSLEFT, :FREEZESSRIGHT, :ORDERDECFACTOR,
+    :ORDERINCFACTOR, :ORDERDECCSTEPFAC1,
+    :ORDERDECSTEPFAC2, :RHS_CALLMODE
+])
 
 const ODEINTERFACE_ALIASES = Dict{Symbol, Symbol}(:RTOL => :reltol,
-                                                  :ATOL => :abstol,
-                                                  :MAXSTEPS => :maxiters,
-                                                  :MAXSS => :dtmax,
-                                                  :INITIALSS => :dt,
-                                                  #:SSMINSEL=>:qmin,
-                                                  :SSBETA => :beta2,
-                                                  :SSMAXSEL => :qmax)
+    :ATOL => :abstol,
+    :MAXSTEPS => :maxiters,
+    :MAXSS => :dtmax,
+    :INITIALSS => :dt,
+    #:SSMINSEL=>:qmin,
+    :SSBETA => :beta2,
+    :SSMAXSEL => :qmax)
 
 const ODEINTERFACE_ALIASES_REVERSED = Dict{Symbol, Symbol}([(v, k)
-                                                            for (k, v) in ODEINTERFACE_ALIASES])
+                                                            for (k, v) in
+                                                                ODEINTERFACE_ALIASES])
 
 const ODEINTERFACE_STRINGS = Dict{Symbol, String}(:LOGIO => "logio",
-                                                  :LOGLEVEL => "loglevel",
-                                                  :RHS_CALLMODE => "RightHandSideCallMode",
-                                                  :RTOL => "RelTol",
-                                                  :ATOL => "AbsTol",
-                                                  :MAXSTEPS => "MaxNumberOfSteps",
-                                                  :EPS => "eps", :OUTPUTFCN => "OutputFcn",
-                                                  :OUTPUTMODE => "OutputFcnMode",
-                                                  :STEST => "StiffTestAfterStep",
-                                                  :RHO => "rho",
-                                                  :SSMINSEL => "StepSizeMinSelection",
-                                                  :SSMAXSEL => "StepSizeMaxSelection",
-                                                  :SSBETA => "StepSizeBeta",
-                                                  :MAXSS => "MaxStep",
-                                                  :INITIALSS => "InitialStep",
-                                                  :MAXEXCOLUMN => "MaxExtrapolationColumn",
-                                                  :MAXSTABCHECKS => "MaxNumberOfStabilityChecks",
-                                                  :MAXSTABCHECKLINE => "MaxLineForStabilityCheck",
-                                                  :INTERPOLDEGREE => "DegreeOfInterpolation",
-                                                  :ORDERDECFRAC => "OrderDecreaseFraction",
-                                                  :ORDERINCFRAC => "OrderIncreaseFraction",
-                                                  :STEPSIZESEQUENCE => "StepSizeSequence",
-                                                  :SSREDUCTION => "StepSizeReduction",
-                                                  :SSSELECTPAR1 => "StepSizeSelectionParam1",
-                                                  :SSSELECTPAR2 => "StepSizeSelectionParam2",
-                                                  :RHO2 => "rho2",
-                                                  :DENSEOUTPUTWOEE => "DeactivateErrorEstInDenseOutput",
-                                                  :TRANSJTOH => "TransformJACtoHess",
-                                                  :MAXNEWTONITER => "MaxNewtonIterations",
-                                                  :NEWTONSTARTZERO => "StartNewtonWithZeros",
-                                                  :DIMOFIND1VAR => "DimensionOfIndex1Vars",
-                                                  :DIMOFIND2VAR => "DimensionOfIndex2Vars",
-                                                  :DIMOFIND3VAR => "DimensionOfIndex3Vars",
-                                                  :STEPSIZESTRATEGY => "StepSizeStrategy",
-                                                  :M1 => "M1",
-                                                  :M2 => "M2",
-                                                  :JACRECOMPFACTOR => "RecomputeJACFactor",
-                                                  :NEWTONSTOPCRIT => "NewtonStopCriterion",
-                                                  :FREEZESSLEFT => "FreezeStepSizeLeftBound",
-                                                  :FREEZESSRIGHT => "FreezeStepSizeRightBound",
-                                                  :MASSMATRIX => "MassMatrix",
-                                                  :JACOBIMATRIX => "JacobiMatrix",
-                                                  :JACOBIBANDSTRUCT => "JacobiBandStructure",
-                                                  :MAXSTAGES => "MaximalNumberOfStages",
-                                                  :MINSTAGES => "MinimalNumberOfStages",
-                                                  :INITSTAGES => "InitialNumberOfStages",
-                                                  :ORDERINCFACTOR => "OrderIncreaseFactor",
-                                                  :ORDERDECFACTOR => "OrderDecreaseFactor",
-                                                  :ORDERDECSTEPFAC1 => "OrderDecreaseStepFactor1",
-                                                  :ORDERDECSTEPFAC2 => "OrderDecreaseStepFactor2",
-                                                  :RHSAUTONOMOUS => "AutonomousRHS",
-                                                  :LAMBDADENSE => "LambdaForDenseOutput",
-                                                  :WORKFORRHS => "WorkForRightHandSide",
-                                                  :WORKFORJAC => "WorkForJacobimatrix",
-                                                  :WORKFORDEC => "WorkForLuDecomposition",
-                                                  :WORKFORSOL => "WorkForSubstitution",
-                                                  :BVPCLASS => "BoundaryValueProblemClass",
-                                                  :SOLMETHOD => "SolutionMethod",
-                                                  :IVPOPT => "OptionsForIVPsolver")
+    :LOGLEVEL => "loglevel",
+    :RHS_CALLMODE => "RightHandSideCallMode",
+    :RTOL => "RelTol",
+    :ATOL => "AbsTol",
+    :MAXSTEPS => "MaxNumberOfSteps",
+    :EPS => "eps", :OUTPUTFCN => "OutputFcn",
+    :OUTPUTMODE => "OutputFcnMode",
+    :STEST => "StiffTestAfterStep",
+    :RHO => "rho",
+    :SSMINSEL => "StepSizeMinSelection",
+    :SSMAXSEL => "StepSizeMaxSelection",
+    :SSBETA => "StepSizeBeta",
+    :MAXSS => "MaxStep",
+    :INITIALSS => "InitialStep",
+    :MAXEXCOLUMN => "MaxExtrapolationColumn",
+    :MAXSTABCHECKS => "MaxNumberOfStabilityChecks",
+    :MAXSTABCHECKLINE => "MaxLineForStabilityCheck",
+    :INTERPOLDEGREE => "DegreeOfInterpolation",
+    :ORDERDECFRAC => "OrderDecreaseFraction",
+    :ORDERINCFRAC => "OrderIncreaseFraction",
+    :STEPSIZESEQUENCE => "StepSizeSequence",
+    :SSREDUCTION => "StepSizeReduction",
+    :SSSELECTPAR1 => "StepSizeSelectionParam1",
+    :SSSELECTPAR2 => "StepSizeSelectionParam2",
+    :RHO2 => "rho2",
+    :DENSEOUTPUTWOEE => "DeactivateErrorEstInDenseOutput",
+    :TRANSJTOH => "TransformJACtoHess",
+    :MAXNEWTONITER => "MaxNewtonIterations",
+    :NEWTONSTARTZERO => "StartNewtonWithZeros",
+    :DIMOFIND1VAR => "DimensionOfIndex1Vars",
+    :DIMOFIND2VAR => "DimensionOfIndex2Vars",
+    :DIMOFIND3VAR => "DimensionOfIndex3Vars",
+    :STEPSIZESTRATEGY => "StepSizeStrategy",
+    :M1 => "M1",
+    :M2 => "M2",
+    :JACRECOMPFACTOR => "RecomputeJACFactor",
+    :NEWTONSTOPCRIT => "NewtonStopCriterion",
+    :FREEZESSLEFT => "FreezeStepSizeLeftBound",
+    :FREEZESSRIGHT => "FreezeStepSizeRightBound",
+    :MASSMATRIX => "MassMatrix",
+    :JACOBIMATRIX => "JacobiMatrix",
+    :JACOBIBANDSTRUCT => "JacobiBandStructure",
+    :MAXSTAGES => "MaximalNumberOfStages",
+    :MINSTAGES => "MinimalNumberOfStages",
+    :INITSTAGES => "InitialNumberOfStages",
+    :ORDERINCFACTOR => "OrderIncreaseFactor",
+    :ORDERDECFACTOR => "OrderDecreaseFactor",
+    :ORDERDECSTEPFAC1 => "OrderDecreaseStepFactor1",
+    :ORDERDECSTEPFAC2 => "OrderDecreaseStepFactor2",
+    :RHSAUTONOMOUS => "AutonomousRHS",
+    :LAMBDADENSE => "LambdaForDenseOutput",
+    :WORKFORRHS => "WorkForRightHandSide",
+    :WORKFORJAC => "WorkForJacobimatrix",
+    :WORKFORDEC => "WorkForLuDecomposition",
+    :WORKFORSOL => "WorkForSubstitution",
+    :BVPCLASS => "BoundaryValueProblemClass",
+    :SOLMETHOD => "SolutionMethod",
+    :IVPOPT => "OptionsForIVPsolver")
 
 struct OutputFunction{T} <: Function
     integrator::T
 end
 
 function (f::OutputFunction)(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
-                             tprev::Float64, t::Float64, u::Vector{Float64},
-                             eval_sol_fcn, extra_data::Dict)
+        tprev::Float64, t::Float64, u::Vector{Float64},
+        eval_sol_fcn, extra_data::Dict)
     if reason == ODEInterface.OUTPUTFCN_CALL_STEP
         integrator = f.integrator
 

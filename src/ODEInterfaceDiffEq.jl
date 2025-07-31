@@ -11,7 +11,7 @@ using LinearAlgebra
 import DiffEqBase: solve
 
 const warnkeywords = (:save_idxs, :d_discontinuities, :unstable_check, :tstops,
-                      :calck, :progress, :dense, :save_start)
+    :calck, :progress, :dense, :save_start)
 
 function __init__()
     global warnlist = Set(warnkeywords)
