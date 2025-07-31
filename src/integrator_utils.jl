@@ -8,23 +8,29 @@ function handle_callbacks!(integrator, eval_sol_fcn)
     discrete_modified = false
     saved_in_cb = false
     if !(continuous_callbacks isa Tuple{})
-        time, upcrossing, event_occurred, event_idx, idx, counter = DiffEqBase.find_first_continuous_callback(integrator,
-                                                                                                             continuous_callbacks...)
+        time, upcrossing,
+        event_occurred,
+        event_idx,
+        idx,
+        counter = DiffEqBase.find_first_continuous_callback(integrator,
+            continuous_callbacks...)
         if event_occurred
             integrator.event_last_time = idx
             integrator.vector_event_last_time = event_idx
-            continuous_modified, saved_in_cb = DiffEqBase.apply_callback!(integrator,
-                                                                          continuous_callbacks[idx],
-                                                                          time, upcrossing,
-                                                                          event_idx)
+            continuous_modified,
+            saved_in_cb = DiffEqBase.apply_callback!(integrator,
+                continuous_callbacks[idx],
+                time, upcrossing,
+                event_idx)
         else
             integrator.event_last_time = 0
             integrator.vector_event_last_time = 1
         end
     end
     if !(discrete_callbacks isa Tuple{})
-        discrete_modified, saved_in_cb = DiffEqBase.apply_discrete_callback!(integrator,
-                                                                             discrete_callbacks...)
+        discrete_modified,
+        saved_in_cb = DiffEqBase.apply_discrete_callback!(integrator,
+            discrete_callbacks...)
     end
     if !saved_in_cb
         savevalues!(integrator)
@@ -34,7 +40,7 @@ function handle_callbacks!(integrator, eval_sol_fcn)
 end
 
 function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,
-                                force_save = false)::Tuple{Bool, Bool}
+        force_save = false)::Tuple{Bool, Bool}
     saved, savedexactly = false, false
     !integrator.opts.save_on && return saved, savedexactly
     uType = eltype(integrator.sol.u)
@@ -57,7 +63,9 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,
     return saved, savedexactly
 end
 
-function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrator, t, modify_save_endpoint::Type{Val{T}}=Val{false}, reinitialize_alg=nothing) where T
+function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrator, t,
+        modify_save_endpoint::Type{Val{T}} = Val{false},
+        reinitialize_alg = nothing) where {T}
     integrator.t = t
     tmp = integrator(integrator.t)::Vector{Float64}
     if eltype(integrator.sol.u) <: Vector
