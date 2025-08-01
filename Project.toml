@@ -15,7 +15,7 @@ SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 
 [compat]
 Compat = "2.2, 3.0, 4"
-DataStructures = "0.18"
+DataStructures = "0.18, 0.19"
 DiffEqBase = "6.122"
 FunctionWrappers = "1.0"
 ODEInterface = "0.5"
