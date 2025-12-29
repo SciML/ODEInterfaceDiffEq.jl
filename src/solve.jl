@@ -233,9 +233,15 @@ function save_value!(_timeseries, u, ::Type{T}, sizeu) where {T <: Array}
 end
 
 function buildOptions(o, optionlist, aliases, aliases_reversed)
-    dict1 = Dict{Symbol, Any}([Pair(k, o[k]) for k in (keys(o) ∩ optionlist)])
-    dict2 = Dict([Pair(aliases_reversed[k], o[k]) for k in (keys(o) ∩ values(aliases))])
-    merge(dict1, dict2)
+    result = Dict{Symbol, Any}()
+    for (k, v) in o
+        if k in optionlist
+            result[k] = v
+        elseif haskey(aliases_reversed, k)
+            result[aliases_reversed[k]] = v
+        end
+    end
+    result
 end
 
 function saveat_disc_handling(saveat, tdir, tspan, tType)
