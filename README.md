@@ -17,7 +17,7 @@ A standard installation on MacOSX and Linux should work. On Windows, you need to
 C:\Program Files\mingw-w64\x86_64-6.1.0-posix-seh-rt_v5-rev0\mingw64\bin
 ```
 
-Note that it is required that you add ODEInterface.jl as well;
+Note that it is required that you add ODEInterface.jl as well:
 
 ```julia
 ]add ODEInterface
@@ -31,6 +31,7 @@ This library adds the common interface to ODEInterface.jl's solvers. [See the Di
 
 ```julia
 using ODEInterface, ODEInterfaceDiffEq
+ODEInterface.loadODESolvers()
 function lorenz(du,u,p,t)
  du[1] = 10.0(u[2]-u[1])
  du[2] = u[1]*(28.0-u[3]) - u[2]
