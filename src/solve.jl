@@ -6,12 +6,13 @@ function DiffEqBase.__solve(
         verbose = true, save_everystep = isempty(saveat),
         save_on = true,
         save_start = save_everystep || isempty(saveat) ||
-                     saveat isa Number ? true :
-                     prob.tspan[1] in saveat,
+            saveat isa Number ? true :
+            prob.tspan[1] in saveat,
         timeseries_errors = true, dense_errors = false,
         callback = nothing, alias_u0 = false,
-        kwargs...) where
-        {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
+        kwargs...
+    ) where
+    {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
     tType = eltype(tuptType)
 
     isstiff = alg isa ODEInterfaceImplicitAlgorithm
@@ -30,8 +31,10 @@ function DiffEqBase.__solve(
 
     max_len_cb = DiffEqBase.max_vector_callback_length(callbacks_internal)
     if max_len_cb isa VectorContinuousCallback
-        callback_cache = DiffEqBase.CallbackCache(max_len_cb.len, uBottomEltype,
-            uBottomEltype)
+        callback_cache = DiffEqBase.CallbackCache(
+            max_len_cb.len, uBottomEltype,
+            uBottomEltype
+        )
     else
         callback_cache = nothing
     end
@@ -70,29 +73,38 @@ function DiffEqBase.__solve(
 
     uprev = similar(u)
 
-    sol = DiffEqBase.build_solution(prob, alg, ts, _timeseries,
+    sol = DiffEqBase.build_solution(
+        prob, alg, ts, _timeseries,
         timeseries_errors = timeseries_errors,
         calculate_error = false,
         stats = DiffEqBase.Stats(0),
-        retcode = ReturnCode.Default)
+        retcode = ReturnCode.Default
+    )
 
     opts = DEOptions(saveat_internal, save_on, save_everystep, callbacks_internal)
     if !isinplace && u isa AbstractArray
         f! = (
-            t, u, du) -> (du[:] = vec(prob.f(reshape(u, sizeu), integrator.p, t)); nothing)
+            t, u, du,
+        ) -> (du[:] = vec(prob.f(reshape(u, sizeu), integrator.p, t)); nothing)
     elseif !(u isa Vector{Float64})
-        f! = (t,
+        f! = (
+            t,
             u,
-            du) -> (prob.f(reshape(du, sizeu), reshape(u, sizeu), integrator.p, t);
+            du,
+        ) -> (
+            prob.f(reshape(du, sizeu), reshape(u, sizeu), integrator.p, t);
             du = vec(du);
-            nothing)
+            nothing
+        )
     else
         f! = (t, u, du) -> prob.f(du, u, integrator.p, t)
     end
 
-    integrator = ODEInterfaceIntegrator(prob.f, u, uprev, tspan[1], tspan[1], prob.p, opts,
+    integrator = ODEInterfaceIntegrator(
+        prob.f, u, uprev, tspan[1], tspan[1], prob.p, opts,
         false, tdir, sizeu, sol,
-        (t) -> [t], 0, 1, callback_cache, alg, 0.0)
+        (t) -> [t], 0, 1, callback_cache, alg, 0.0
+    )
     initialize_callbacks!(integrator)
 
     outputfcn = OutputFunction(integrator)
@@ -108,10 +120,12 @@ function DiffEqBase.__solve(
         o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_WODENSE
     end
 
-    dict = buildOptions(o,
+    dict = buildOptions(
+        o,
         ODEINTERFACE_OPTION_LIST,
         ODEINTERFACE_ALIASES,
-        ODEINTERFACE_ALIASES_REVERSED)
+        ODEINTERFACE_ALIASES_REVERSED
+    )
     if prob.f.mass_matrix != I
         if prob.f.mass_matrix isa Matrix && isstiff
             dict[:MASSMATRIX] = prob.f.mass_matrix
@@ -134,46 +148,64 @@ function DiffEqBase.__solve(
 
     if alg isa dopri5
         tend, uend,
-        retcode,
-        stats = ODEInterface.dopri5(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode,
+            stats = ODEInterface.dopri5(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     elseif alg isa dop853
         tend, uend,
-        retcode,
-        stats = ODEInterface.dop853(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode,
+            stats = ODEInterface.dop853(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     elseif alg isa odex
         tend, uend,
-        retcode, stats = ODEInterface.odex(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode, stats = ODEInterface.odex(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     elseif alg isa seulex
         tend, uend,
-        retcode,
-        stats = ODEInterface.seulex(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode,
+            stats = ODEInterface.seulex(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     elseif alg isa radau
         tend, uend,
-        retcode, stats = ODEInterface.radau(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode, stats = ODEInterface.radau(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     elseif alg isa radau5
         tend, uend,
-        retcode,
-        stats = ODEInterface.radau5(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode,
+            stats = ODEInterface.radau5(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     elseif alg isa rodas
         tend, uend,
-        retcode, stats = ODEInterface.rodas(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode, stats = ODEInterface.rodas(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     elseif alg isa ddeabm
         tend, uend,
-        retcode,
-        stats = ODEInterface.ddeabm(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode,
+            stats = ODEInterface.ddeabm(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     elseif alg isa ddebdf
         tend, uend,
-        retcode,
-        stats = ODEInterface.ddebdf(f!, tspan[1], tspan[2],
-            vec(integrator.u), opts)
+            retcode,
+            stats = ODEInterface.ddebdf(
+            f!, tspan[1], tspan[2],
+            vec(integrator.u), opts
+        )
     end
 
     if !save_everystep
@@ -200,9 +232,11 @@ function DiffEqBase.__solve(
     end
 
     if DiffEqBase.has_analytic(prob.f)
-        DiffEqBase.calculate_solution_errors!(integrator.sol;
+        DiffEqBase.calculate_solution_errors!(
+            integrator.sol;
             timeseries_errors = timeseries_errors,
-            dense_errors = dense_errors)
+            dense_errors = dense_errors
+        )
     end
 
     destats = sol.stats
@@ -217,19 +251,19 @@ function DiffEqBase.__solve(
     if haskey(stats, "no_lu_decomp")
         destats.nw = stats["no_lu_decomp"]
     end
-    DiffEqBase.solution_new_retcode(sol, return_retcode)
+    return DiffEqBase.solution_new_retcode(sol, return_retcode)
 end
 
 function save_value!(_timeseries, u, ::Type{T}, sizeu) where {T <: Number}
-    push!(_timeseries, first(u))
+    return push!(_timeseries, first(u))
 end
 
 function save_value!(_timeseries, u, ::Type{T}, sizeu) where {T <: Vector}
-    push!(_timeseries, u)
+    return push!(_timeseries, u)
 end
 
 function save_value!(_timeseries, u, ::Type{T}, sizeu) where {T <: Array}
-    push!(_timeseries, reshape(u, sizeu))
+    return push!(_timeseries, reshape(u, sizeu))
 end
 
 function buildOptions(o, optionlist, aliases, aliases_reversed)
@@ -241,23 +275,35 @@ function buildOptions(o, optionlist, aliases, aliases_reversed)
             result[aliases_reversed[k]] = v
         end
     end
-    result
+    return result
 end
 
 function saveat_disc_handling(saveat, tdir, tspan, tType)
     if saveat isa Number
         if (tspan[1]:saveat:tspan[end])[end] == tspan[end]
-            saveat_vec = convert(Vector{tType},
-                collect(tType, (tspan[1] + saveat):saveat:tspan[end]))
+            saveat_vec = convert(
+                Vector{tType},
+                collect(tType, (tspan[1] + saveat):saveat:tspan[end])
+            )
         else
-            saveat_vec = convert(Vector{tType},
-                collect(tType,
-                    (tspan[1] + saveat):saveat:(tspan[end] - saveat)))
+            saveat_vec = convert(
+                Vector{tType},
+                collect(
+                    tType,
+                    (tspan[1] + saveat):saveat:(tspan[end] - saveat)
+                )
+            )
         end
     else
-        saveat_vec = vec(collect(tType,
-            Iterators.filter(x -> tdir * tspan[1] < tdir * x <
-                                  tdir * tspan[end], saveat)))
+        saveat_vec = vec(
+            collect(
+                tType,
+                Iterators.filter(
+                    x -> tdir * tspan[1] < tdir * x <
+                        tdir * tspan[end], saveat
+                )
+            )
+        )
     end
 
     if tdir > 0
@@ -266,45 +312,55 @@ function saveat_disc_handling(saveat, tdir, tspan, tType)
         saveat_internal = BinaryMaxHeap(saveat_vec)
     end
 
-    saveat_internal
+    return saveat_internal
 end
 
-const ODEINTERFACE_OPTION_LIST = Set([:RTOL, :ATOL, :OUTPUTFCN, :OUTPUTMODE, :MAXSTEPS,
-    :STEST, :EPS, :RHO, :SSMINSEL,
-    :SSMAXSEL, :SSBETA, :MAXSS, :INITIALSS,
-    :MAXEXCOLUMN, :STEPSIZESEQUENCE,
-    :MAXSTABCHECKS, :MAXSTABCHECKLINE,
-    :DENSEOUTPUTWOEE, :INTERPOLDEGRE,
-    :SSREDUCTION, :SSSELECTPAR1, :SSSELECTPAR2,
-    :ORDERDECFRAC, :ORDERINCFRAC,
-    :OPT_RHO, :OPT_RHO2, :RHSAUTONOMOUS, :M1, :M2,
-    :LAMBDADENSE, :TRANSJTOH,
-    :STEPSIZESEQUENCE, :JACRECOMPFACTOR, :MASSMATRIX,
-    :JACOBIMATRIX, :JACOBIBANDSSTRUCT,
-    :WORKFORRHS, :WORKFORJAC, :WORKFORDEC, :WORKFORSOL,
-    :MAXNEWTONITER, :NEWTONSTARTZERO, :NEWTONSTOPCRIT,
-    :DIMFIND1VAR,
-    :MAXSTAGES, :MINSTAGES, :INITSTAGES,
-    :STEPSIZESTRATEGY,
-    :FREEZESSLEFT, :FREEZESSRIGHT, :ORDERDECFACTOR,
-    :ORDERINCFACTOR, :ORDERDECCSTEPFAC1,
-    :ORDERDECSTEPFAC2, :RHS_CALLMODE
-])
+const ODEINTERFACE_OPTION_LIST = Set(
+    [
+        :RTOL, :ATOL, :OUTPUTFCN, :OUTPUTMODE, :MAXSTEPS,
+        :STEST, :EPS, :RHO, :SSMINSEL,
+        :SSMAXSEL, :SSBETA, :MAXSS, :INITIALSS,
+        :MAXEXCOLUMN, :STEPSIZESEQUENCE,
+        :MAXSTABCHECKS, :MAXSTABCHECKLINE,
+        :DENSEOUTPUTWOEE, :INTERPOLDEGRE,
+        :SSREDUCTION, :SSSELECTPAR1, :SSSELECTPAR2,
+        :ORDERDECFRAC, :ORDERINCFRAC,
+        :OPT_RHO, :OPT_RHO2, :RHSAUTONOMOUS, :M1, :M2,
+        :LAMBDADENSE, :TRANSJTOH,
+        :STEPSIZESEQUENCE, :JACRECOMPFACTOR, :MASSMATRIX,
+        :JACOBIMATRIX, :JACOBIBANDSSTRUCT,
+        :WORKFORRHS, :WORKFORJAC, :WORKFORDEC, :WORKFORSOL,
+        :MAXNEWTONITER, :NEWTONSTARTZERO, :NEWTONSTOPCRIT,
+        :DIMFIND1VAR,
+        :MAXSTAGES, :MINSTAGES, :INITSTAGES,
+        :STEPSIZESTRATEGY,
+        :FREEZESSLEFT, :FREEZESSRIGHT, :ORDERDECFACTOR,
+        :ORDERINCFACTOR, :ORDERDECCSTEPFAC1,
+        :ORDERDECSTEPFAC2, :RHS_CALLMODE,
+    ]
+)
 
-const ODEINTERFACE_ALIASES = Dict{Symbol, Symbol}(:RTOL => :reltol,
+const ODEINTERFACE_ALIASES = Dict{Symbol, Symbol}(
+    :RTOL => :reltol,
     :ATOL => :abstol,
     :MAXSTEPS => :maxiters,
     :MAXSS => :dtmax,
     :INITIALSS => :dt,
     #:SSMINSEL=>:qmin,
     :SSBETA => :beta2,
-    :SSMAXSEL => :qmax)
+    :SSMAXSEL => :qmax
+)
 
-const ODEINTERFACE_ALIASES_REVERSED = Dict{Symbol, Symbol}([(v, k)
-                                                            for (k, v) in
-                                                                ODEINTERFACE_ALIASES])
+const ODEINTERFACE_ALIASES_REVERSED = Dict{Symbol, Symbol}(
+    [
+        (v, k)
+            for (k, v) in
+            ODEINTERFACE_ALIASES
+    ]
+)
 
-const ODEINTERFACE_STRINGS = Dict{Symbol, String}(:LOGIO => "logio",
+const ODEINTERFACE_STRINGS = Dict{Symbol, String}(
+    :LOGIO => "logio",
     :LOGLEVEL => "loglevel",
     :RHS_CALLMODE => "RightHandSideCallMode",
     :RTOL => "RelTol",
@@ -362,15 +418,18 @@ const ODEINTERFACE_STRINGS = Dict{Symbol, String}(:LOGIO => "logio",
     :WORKFORSOL => "WorkForSubstitution",
     :BVPCLASS => "BoundaryValueProblemClass",
     :SOLMETHOD => "SolutionMethod",
-    :IVPOPT => "OptionsForIVPsolver")
+    :IVPOPT => "OptionsForIVPsolver"
+)
 
 struct OutputFunction{T} <: Function
     integrator::T
 end
 
-function (f::OutputFunction)(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
+function (f::OutputFunction)(
+        reason::ODEInterface.OUTPUTFCN_CALL_REASON,
         tprev::Float64, t::Float64, u::Vector{Float64},
-        eval_sol_fcn, extra_data::Dict)
+        eval_sol_fcn, extra_data::Dict
+    )
     if reason == ODEInterface.OUTPUTFCN_CALL_STEP
         integrator = f.integrator
 
@@ -402,5 +461,5 @@ function (f::OutputFunction)(reason::ODEInterface.OUTPUTFCN_CALL_REASON,
 
     end
 
-    ODEInterface.OUTPUTFCN_RET_CONTINUE
+    return ODEInterface.OUTPUTFCN_RET_CONTINUE
 end
