@@ -9,19 +9,23 @@ function handle_callbacks!(integrator, eval_sol_fcn)
     saved_in_cb = false
     if !(continuous_callbacks isa Tuple{})
         time, upcrossing,
-        event_occurred,
-        event_idx,
-        idx,
-        counter = DiffEqBase.find_first_continuous_callback(integrator,
-            continuous_callbacks...)
+            event_occurred,
+            event_idx,
+            idx,
+            counter = DiffEqBase.find_first_continuous_callback(
+            integrator,
+            continuous_callbacks...
+        )
         if event_occurred
             integrator.event_last_time = idx
             integrator.vector_event_last_time = event_idx
             continuous_modified,
-            saved_in_cb = DiffEqBase.apply_callback!(integrator,
+                saved_in_cb = DiffEqBase.apply_callback!(
+                integrator,
                 continuous_callbacks[idx],
                 time, upcrossing,
-                event_idx)
+                event_idx
+            )
         else
             integrator.event_last_time = 0
             integrator.vector_event_last_time = 1
@@ -29,18 +33,22 @@ function handle_callbacks!(integrator, eval_sol_fcn)
     end
     if !(discrete_callbacks isa Tuple{})
         discrete_modified,
-        saved_in_cb = DiffEqBase.apply_discrete_callback!(integrator,
-            discrete_callbacks...)
+            saved_in_cb = DiffEqBase.apply_discrete_callback!(
+            integrator,
+            discrete_callbacks...
+        )
     end
     if !saved_in_cb
         savevalues!(integrator)
     end
 
-    integrator.u_modified = continuous_modified || discrete_modified
+    return integrator.u_modified = continuous_modified || discrete_modified
 end
 
-function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,
-        force_save = false)::Tuple{Bool, Bool}
+function DiffEqBase.savevalues!(
+        integrator::ODEInterfaceIntegrator,
+        force_save = false
+    )::Tuple{Bool, Bool}
     saved, savedexactly = false, false
     !integrator.opts.save_on && return saved, savedexactly
     uType = eltype(integrator.sol.u)
@@ -52,7 +60,7 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,
     end
 
     while !isempty(integrator.opts.saveat) &&
-        integrator.tdir * first(integrator.opts.saveat) < integrator.tdir * integrator.t
+            integrator.tdir * first(integrator.opts.saveat) < integrator.tdir * integrator.t
         saved = true
         curt = pop!(integrator.opts.saveat)
         tmp = integrator(curt)::Vector{Float64}
@@ -63,9 +71,11 @@ function DiffEqBase.savevalues!(integrator::ODEInterfaceIntegrator,
     return saved, savedexactly
 end
 
-function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrator, t,
+function DiffEqBase.change_t_via_interpolation!(
+        integrator::ODEInterfaceIntegrator, t,
         modify_save_endpoint::Type{Val{T}} = Val{false},
-        reinitialize_alg = nothing) where {T}
+        reinitialize_alg = nothing
+    ) where {T}
     integrator.t = t
     tmp = integrator(integrator.t)::Vector{Float64}
     if eltype(integrator.sol.u) <: Vector
@@ -73,7 +83,7 @@ function DiffEqBase.change_t_via_interpolation!(integrator::ODEInterfaceIntegrat
     else
         integrator.u .= reshape(tmp, integrator.sizeu)
     end
-    nothing
+    return nothing
 end
 DiffEqBase.get_tmp_cache(i::ODEInterfaceIntegrator, args...) = nothing
 
@@ -86,7 +96,7 @@ DiffEqBase.get_tmp_cache(i::ODEInterfaceIntegrator, args...) = nothing
 end
 
 @inline function DiffEqBase.u_modified!(integrator::ODEInterfaceIntegrator, bool::Bool)
-    integrator.u_modified = bool
+    return integrator.u_modified = bool
 end
 
 function initialize_callbacks!(integrator, initialize_save = true)
@@ -100,14 +110,16 @@ function initialize_callbacks!(integrator, initialize_save = true)
     # if the user modifies u, we need to fix current values
     if u_modified
         if initialize_save &&
-           (any((c) -> c.save_positions[2], callbacks.discrete_callbacks) ||
-            any((c) -> c.save_positions[2], callbacks.continuous_callbacks))
+                (
+                any((c) -> c.save_positions[2], callbacks.discrete_callbacks) ||
+                    any((c) -> c.save_positions[2], callbacks.continuous_callbacks)
+            )
             savevalues!(integrator, true)
         end
     end
 
     # reset this as it is now handled so the integrators should proceed as normal
-    integrator.u_modified = false
+    return integrator.u_modified = false
 end
 
 DiffEqBase.set_proposed_dt!(integrator::ODEInterfaceIntegrator, dt) = nothing

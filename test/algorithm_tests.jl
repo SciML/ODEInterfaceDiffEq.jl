@@ -1,6 +1,6 @@
 using ODEInterfaceDiffEq, DiffEqBase, Test
 import ODEProblemLibrary: prob_ode_linear,
-                          prob_ode_2Dlinear, prob_ode_vanderpol
+    prob_ode_2Dlinear, prob_ode_vanderpol
 
 prob = prob_ode_linear
 sol = solve(prob, dopri5(), dt = 1 // 2^(4))

@@ -5,9 +5,11 @@ mutable struct DEOptions{SType, CType}
     callback::CType
 end
 
-mutable struct ODEInterfaceIntegrator{F, algType, uType, uPrevType, oType, SType, solType,
-    P, CallbackCacheType} <:
-               DiffEqBase.AbstractODEIntegrator{algType, true, uType, Float64}
+mutable struct ODEInterfaceIntegrator{
+        F, algType, uType, uPrevType, oType, SType, solType,
+        P, CallbackCacheType,
+    } <:
+    DiffEqBase.AbstractODEIntegrator{algType, true, uType, Float64}
     f::F
     u::uType
     uprev::uPrevType
@@ -27,9 +29,11 @@ mutable struct ODEInterfaceIntegrator{F, algType, uType, uPrevType, oType, SType
     last_event_error::Float64
 end
 
-@inline function (integrator::ODEInterfaceIntegrator)(t, deriv::Type{Val{N}} = Val{0};
-        idxs = nothing) where {N}
-    @assert N==0 "ODEInterface does not support dense derivative"
+@inline function (integrator::ODEInterfaceIntegrator)(
+        t, deriv::Type{Val{N}} = Val{0};
+        idxs = nothing
+    ) where {N}
+    @assert N == 0 "ODEInterface does not support dense derivative"
     sol = integrator.eval_sol_fcn(t)
     return idxs == nothing ? sol : sol[idxs]
 end
