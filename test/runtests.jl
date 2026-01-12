@@ -1,6 +1,9 @@
 using ODEInterfaceDiffEq, DiffEqBase
 using Test
 
+@time @testset "Explicit Imports" begin
+    include("explicit_imports.jl")
+end
 @time @testset "Algorithms" begin
     include("algorithm_tests.jl")
 end

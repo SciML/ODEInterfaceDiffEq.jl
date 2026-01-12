@@ -24,8 +24,9 @@ SciMLBase = "1.73, 2"
 julia = "1.6"
 
 [extras]
+ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
 ODEProblemLibrary = "fdc4e326-1af4-4b90-96e7-779fcce2daa5"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "ODEProblemLibrary"]
+test = ["ExplicitImports", "Test", "ODEProblemLibrary"]
