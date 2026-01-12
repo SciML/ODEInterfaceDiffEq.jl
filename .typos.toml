@@ -74,3 +74,4 @@ SDE = "SDE"
 
 # ODEInterfaceDiffEq specific terms
 seh = "seh"  # Legitimate German pronoun or abbreviation
+Stoer = "Stoer"  # Josef Stoer - co-creator of Bulirsch-Stoer algorithm
