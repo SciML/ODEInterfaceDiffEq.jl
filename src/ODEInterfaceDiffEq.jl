@@ -2,13 +2,20 @@ __precompile__()
 
 module ODEInterfaceDiffEq
 
-    using Reexport
+    using Reexport: @reexport
     @reexport using DiffEqBase
+    using DiffEqBase: DiffEqBase
 
-    using ODEInterface, Compat, DataStructures, FunctionWrappers
-    using LinearAlgebra
+    import Compat
+    import FunctionWrappers
+    import ODEInterface
+    import SciMLBase
+    using DataStructures: BinaryMaxHeap, BinaryMinHeap, counter
+    using LinearAlgebra: I
+    using SciMLBase: CallbackSet, ReturnCode, VectorContinuousCallback, check_keywords,
+        warn_compat
 
-    import DiffEqBase: solve
+    import DiffEqBase: solve, initialize!, savevalues!
 
     const warnkeywords = (
         :save_idxs, :d_discontinuities, :unstable_check, :tstops,
