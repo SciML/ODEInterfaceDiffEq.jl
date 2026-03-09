@@ -126,7 +126,21 @@ function DiffEqBase.__solve(
         ODEINTERFACE_ALIASES,
         ODEINTERFACE_ALIASES_REVERSED
     )
-    if prob.f.mass_matrix != I
+
+    # Forward DAE structure options from radau/radau5 algorithm fields
+    if alg isa Union{radau, radau5}
+        for field in (:M1, :M2, :DIMOFIND1VAR, :DIMOFIND2VAR, :DIMOFIND3VAR)
+            val = getfield(alg, field)
+            if val !== nothing
+                dict[field] = val
+            end
+        end
+        if alg.massmatrix !== nothing
+            dict[:MASSMATRIX] = alg.massmatrix
+        end
+    end
+
+    if !haskey(dict, :MASSMATRIX) && prob.f.mass_matrix != I
         if prob.f.mass_matrix isa Matrix && isstiff
             dict[:MASSMATRIX] = prob.f.mass_matrix
         elseif !isstiff
@@ -331,7 +345,7 @@ const ODEINTERFACE_OPTION_LIST = Set(
         :JACOBIMATRIX, :JACOBIBANDSSTRUCT,
         :WORKFORRHS, :WORKFORJAC, :WORKFORDEC, :WORKFORSOL,
         :MAXNEWTONITER, :NEWTONSTARTZERO, :NEWTONSTOPCRIT,
-        :DIMFIND1VAR,
+        :DIMOFIND1VAR, :DIMOFIND2VAR, :DIMOFIND3VAR,
         :MAXSTAGES, :MINSTAGES, :INITSTAGES,
         :STEPSIZESTRATEGY,
         :FREEZESSLEFT, :FREEZESSRIGHT, :ORDERDECFACTOR,
