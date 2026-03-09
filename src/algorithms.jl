@@ -80,7 +80,10 @@ end
 SciMLBase.alg_order(alg::seulex) = 12
 
 """
-    radau(; jac_lower = nothing, jac_upper = nothing)
+    radau(; jac_lower = nothing, jac_upper = nothing,
+           M1 = nothing, M2 = nothing,
+           DIMOFIND1VAR = nothing, DIMOFIND2VAR = nothing, DIMOFIND3VAR = nothing,
+           massmatrix = nothing)
 
 Implicit Runge-Kutta (Radau IIA) method of variable order between 5 and 13.
 
@@ -91,6 +94,12 @@ efficiently.
 ## Arguments
 - `jac_lower`: Lower bandwidth of the Jacobian for banded matrices
 - `jac_upper`: Upper bandwidth of the Jacobian for banded matrices
+- `M1`: Number of equations with trivial structure `y_i' = y_{i+M2}` (block structure)
+- `M2`: Block size for the M1 trivial equations
+- `DIMOFIND1VAR`: Number of index-1 variables (for DAE index information)
+- `DIMOFIND2VAR`: Number of index-2 variables (for DAE index information)
+- `DIMOFIND3VAR`: Number of index-3 variables (for DAE index information)
+- `massmatrix`: Mass matrix for the non-trivial block (overrides `prob.f.mass_matrix`)
 
 ## Solver Properties
 - Order: 5 to 13 (variable)
@@ -98,14 +107,23 @@ efficiently.
 - Type: Implicit Runge-Kutta (Radau IIA)
 - Suitable for: Stiff problems and DAEs
 """
-struct radau{T} <: ODEInterfaceImplicitAlgorithm
+struct radau{T, MM} <: ODEInterfaceImplicitAlgorithm
     jac_lower::T
     jac_upper::T
+    M1::Union{Nothing, Int}
+    M2::Union{Nothing, Int}
+    DIMOFIND1VAR::Union{Nothing, Int}
+    DIMOFIND2VAR::Union{Nothing, Int}
+    DIMOFIND3VAR::Union{Nothing, Int}
+    massmatrix::MM
 end
 SciMLBase.alg_order(alg::radau) = 13
 
 """
-    radau5(; jac_lower = nothing, jac_upper = nothing)
+    radau5(; jac_lower = nothing, jac_upper = nothing,
+            M1 = nothing, M2 = nothing,
+            DIMOFIND1VAR = nothing, DIMOFIND2VAR = nothing, DIMOFIND3VAR = nothing,
+            massmatrix = nothing)
 
 Implicit Runge-Kutta method (Radau IIA) of order 5.
 
@@ -115,6 +133,12 @@ Radau method, often preferred when a specific order is desired or for comparison
 ## Arguments
 - `jac_lower`: Lower bandwidth of the Jacobian for banded matrices
 - `jac_upper`: Upper bandwidth of the Jacobian for banded matrices
+- `M1`: Number of equations with trivial structure `y_i' = y_{i+M2}` (block structure)
+- `M2`: Block size for the M1 trivial equations
+- `DIMOFIND1VAR`: Number of index-1 variables (for DAE index information)
+- `DIMOFIND2VAR`: Number of index-2 variables (for DAE index information)
+- `DIMOFIND3VAR`: Number of index-3 variables (for DAE index information)
+- `massmatrix`: Mass matrix for the non-trivial block (overrides `prob.f.mass_matrix`)
 
 ## Solver Properties
 - Order: 5
@@ -122,9 +146,15 @@ Radau method, often preferred when a specific order is desired or for comparison
 - Type: Implicit Runge-Kutta (Radau IIA)
 - Suitable for: Stiff problems and DAEs
 """
-struct radau5{T} <: ODEInterfaceImplicitAlgorithm
+struct radau5{T, MM} <: ODEInterfaceImplicitAlgorithm
     jac_lower::T
     jac_upper::T
+    M1::Union{Nothing, Int}
+    M2::Union{Nothing, Int}
+    DIMOFIND1VAR::Union{Nothing, Int}
+    DIMOFIND2VAR::Union{Nothing, Int}
+    DIMOFIND3VAR::Union{Nothing, Int}
+    massmatrix::MM
 end
 SciMLBase.alg_order(alg::radau5) = 5
 
@@ -196,7 +226,17 @@ end
 SciMLBase.alg_order(alg::ddebdf) = 5
 
 seulex(; jac_lower = nothing, jac_upper = nothing) = seulex(jac_lower, jac_upper)
-radau(; jac_lower = nothing, jac_upper = nothing) = radau(jac_lower, jac_upper)
-radau5(; jac_lower = nothing, jac_upper = nothing) = radau5(jac_lower, jac_upper)
+function radau(; jac_lower = nothing, jac_upper = nothing,
+               M1 = nothing, M2 = nothing,
+               DIMOFIND1VAR = nothing, DIMOFIND2VAR = nothing, DIMOFIND3VAR = nothing,
+               massmatrix = nothing)
+    radau(jac_lower, jac_upper, M1, M2, DIMOFIND1VAR, DIMOFIND2VAR, DIMOFIND3VAR, massmatrix)
+end
+function radau5(; jac_lower = nothing, jac_upper = nothing,
+                M1 = nothing, M2 = nothing,
+                DIMOFIND1VAR = nothing, DIMOFIND2VAR = nothing, DIMOFIND3VAR = nothing,
+                massmatrix = nothing)
+    radau5(jac_lower, jac_upper, M1, M2, DIMOFIND1VAR, DIMOFIND2VAR, DIMOFIND3VAR, massmatrix)
+end
 rodas(; jac_lower = nothing, jac_upper = nothing) = rodas(jac_lower, jac_upper)
 ddebdf(; jac_lower = nothing, jac_upper = nothing) = ddebdf(jac_lower, jac_upper)
