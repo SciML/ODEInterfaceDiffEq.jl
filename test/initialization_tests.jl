@@ -10,8 +10,8 @@ using LinearAlgebra
 
     function robertson!(du, u, p, t)
         y1, y2, y3 = u
-        du[1] = -0.04 * y1 + 1e4 * y2 * y3
-        du[2] = 0.04 * y1 - 1e4 * y2 * y3 - 3e7 * y2^2
+        du[1] = -0.04 * y1 + 1.0e4 * y2 * y3
+        du[2] = 0.04 * y1 - 1.0e4 * y2 * y3 - 3.0e7 * y2^2
         du[3] = y1 + y2 + y3 - 1.0  # algebraic equation
         return nothing
     end
@@ -23,14 +23,14 @@ using LinearAlgebra
         # With correct initial conditions
         u0_correct = [1.0, 0.0, 0.0]  # satisfies y1 + y2 + y3 = 1
         f = ODEFunction(robertson!; mass_matrix = M)
-        prob = ODEProblem(f, u0_correct, (0.0, 1e-3))
+        prob = ODEProblem(f, u0_correct, (0.0, 1.0e-3))
 
         sol = solve(prob, radau5(); initializealg = NoInit())
         @test sol.retcode == ReturnCode.Success
 
         # With incorrect initial conditions - NoInit should still work (no check)
         u0_wrong = [1.0, 1.0, 1.0]  # does NOT satisfy y1 + y2 + y3 = 1
-        prob_wrong = ODEProblem(f, u0_wrong, (0.0, 1e-3))
+        prob_wrong = ODEProblem(f, u0_wrong, (0.0, 1.0e-3))
 
         # NoInit should not throw, even with wrong ICs
         sol_wrong = solve(prob_wrong, radau5(); initializealg = NoInit())
@@ -41,14 +41,14 @@ using LinearAlgebra
     @testset "CheckInit - verify constraints" begin
         u0_correct = [1.0, 0.0, 0.0]  # satisfies y1 + y2 + y3 = 1
         f = ODEFunction(robertson!; mass_matrix = M)
-        prob = ODEProblem(f, u0_correct, (0.0, 1e-3))
+        prob = ODEProblem(f, u0_correct, (0.0, 1.0e-3))
 
         sol = solve(prob, radau5(); initializealg = CheckInit())
         @test sol.retcode == ReturnCode.Success
 
         # With incorrect initial conditions
         u0_wrong = [1.0, 1.0, 1.0]  # does NOT satisfy y1 + y2 + y3 = 1
-        prob_wrong = ODEProblem(f, u0_wrong, (0.0, 1e-3))
+        prob_wrong = ODEProblem(f, u0_wrong, (0.0, 1.0e-3))
 
         @test_throws ErrorException solve(prob_wrong, radau5(); initializealg = CheckInit())
     end
@@ -57,7 +57,7 @@ using LinearAlgebra
         # Without initialization_data, should use CheckInit
         u0_correct = [1.0, 0.0, 0.0]
         f = ODEFunction(robertson!; mass_matrix = M)
-        prob = ODEProblem(f, u0_correct, (0.0, 1e-3))
+        prob = ODEProblem(f, u0_correct, (0.0, 1.0e-3))
 
         sol = solve(prob, radau5(); initializealg = DefaultInit())
         @test sol.retcode == ReturnCode.Success
@@ -88,7 +88,7 @@ using LinearAlgebra
     @testset "Multiple solvers with initialization" begin
         u0_correct = [1.0, 0.0, 0.0]
         f = ODEFunction(robertson!; mass_matrix = M)
-        prob = ODEProblem(f, u0_correct, (0.0, 1e-3))
+        prob = ODEProblem(f, u0_correct, (0.0, 1.0e-3))
 
         # Test with different implicit solvers that support mass matrices
         for alg in [radau5(), radau(), rodas(), seulex(), ddebdf()]

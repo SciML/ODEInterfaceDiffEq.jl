@@ -70,11 +70,11 @@ function DiffEqBase.initialize_dae!(
 
     # Check residuals of algebraic equations only
     abstol = integrator.sol.prob isa DiffEqBase.AbstractODEProblem ?
-             get(Dict(integrator.opts.callback.discrete_callbacks), :abstol, 1e-8) : 1e-8
+        get(Dict(integrator.opts.callback.discrete_callbacks), :abstol, 1.0e-8) : 1.0e-8
 
     # Try to get abstol from the solve options, fallback to default
     # Note: ODEInterface doesn't expose tolerances through the integrator in the same way
-    abstol = 1e-8  # Default tolerance
+    abstol = 1.0e-8  # Default tolerance
 
     max_residual = maximum(abs.(tmp[algebraic_eqs]))
 
@@ -119,8 +119,8 @@ function DiffEqBase.initialize_dae!(
     isinplace = Val(SciMLBase.isinplace(prob))
 
     # Default tolerances
-    abstol = 1e-8
-    reltol = 1e-8
+    abstol = 1.0e-8
+    reltol = 1.0e-8
 
     u0, p, success = SciMLBase.get_initial_values(
         prob, integrator, f, initializealg, isinplace;

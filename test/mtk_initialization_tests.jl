@@ -103,6 +103,6 @@ end
         sol = solve(prob, alg())
         @test SciMLBase.successful_retcode(sol)
         # Check that the constraint is satisfied throughout
-        @test all(abs.((sol[x] .^ 2 .+ sol[y] .^ 2) .- L^2) .< 1e-4)
+        @test all(abs.((sol[x] .^ 2 .+ sol[y] .^ 2) .- L^2) .< 1.0e-4)
     end
 end
