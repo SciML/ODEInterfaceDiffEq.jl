@@ -226,17 +226,21 @@ end
 SciMLBase.alg_order(alg::ddebdf) = 5
 
 seulex(; jac_lower = nothing, jac_upper = nothing) = seulex(jac_lower, jac_upper)
-function radau(; jac_lower = nothing, jac_upper = nothing,
-               M1 = nothing, M2 = nothing,
-               DIMOFIND1VAR = nothing, DIMOFIND2VAR = nothing, DIMOFIND3VAR = nothing,
-               massmatrix = nothing)
-    radau(jac_lower, jac_upper, M1, M2, DIMOFIND1VAR, DIMOFIND2VAR, DIMOFIND3VAR, massmatrix)
+function radau(;
+        jac_lower = nothing, jac_upper = nothing,
+        M1 = nothing, M2 = nothing,
+        DIMOFIND1VAR = nothing, DIMOFIND2VAR = nothing, DIMOFIND3VAR = nothing,
+        massmatrix = nothing
+    )
+    return radau(jac_lower, jac_upper, M1, M2, DIMOFIND1VAR, DIMOFIND2VAR, DIMOFIND3VAR, massmatrix)
 end
-function radau5(; jac_lower = nothing, jac_upper = nothing,
-                M1 = nothing, M2 = nothing,
-                DIMOFIND1VAR = nothing, DIMOFIND2VAR = nothing, DIMOFIND3VAR = nothing,
-                massmatrix = nothing)
-    radau5(jac_lower, jac_upper, M1, M2, DIMOFIND1VAR, DIMOFIND2VAR, DIMOFIND3VAR, massmatrix)
+function radau5(;
+        jac_lower = nothing, jac_upper = nothing,
+        M1 = nothing, M2 = nothing,
+        DIMOFIND1VAR = nothing, DIMOFIND2VAR = nothing, DIMOFIND3VAR = nothing,
+        massmatrix = nothing
+    )
+    return radau5(jac_lower, jac_upper, M1, M2, DIMOFIND1VAR, DIMOFIND2VAR, DIMOFIND3VAR, massmatrix)
 end
 rodas(; jac_lower = nothing, jac_upper = nothing) = rodas(jac_lower, jac_upper)
 ddebdf(; jac_lower = nothing, jac_upper = nothing) = ddebdf(jac_lower, jac_upper)

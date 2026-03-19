@@ -150,8 +150,8 @@ function DiffEqBase.__solve(
     end
 
     if !haskey(dict, :MASSMATRIX) && prob.f.mass_matrix != I
-        if prob.f.mass_matrix isa Matrix && isstiff
-            dict[:MASSMATRIX] = prob.f.mass_matrix
+        if prob.f.mass_matrix isa AbstractMatrix && isstiff
+            dict[:MASSMATRIX] = Matrix(prob.f.mass_matrix)
         elseif !isstiff
             error("This solver does not support mass matrices")
         else
