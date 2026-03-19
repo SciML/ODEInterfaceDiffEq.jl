@@ -8,17 +8,29 @@ import DiffEqBase: DefaultInit
 # Re-export initialization algorithms (including DefaultInit from DiffEqBase)
 export OverrideInit, NoInit, CheckInit, DefaultInit
 
-# DefaultInit dispatches to the appropriate algorithm based on problem structure
+# DefaultInit: OverrideInit → CheckInit pattern (matching Sundials v5)
+# First run OverrideInit to compute consistent initial conditions,
+# then run CheckInit to verify the algebraic constraints are satisfied.
 function DiffEqBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
         initializealg::DefaultInit
     )
     prob = integrator.sol.prob
-    return if has_initialization_data(prob.f)
+
+    # First: OverrideInit to compute consistent initial conditions
+    if has_initialization_data(prob.f)
         DiffEqBase.initialize_dae!(integrator, OverrideInit())
-    else
-        DiffEqBase.initialize_dae!(integrator, CheckInit())
+
+        # Check if OverrideInit failed
+        if integrator.sol.retcode == ReturnCode.InitialFailure
+            return nothing
+        end
     end
+
+    # Then: CheckInit to verify algebraic constraints are satisfied
+    DiffEqBase.initialize_dae!(integrator, CheckInit())
+
+    return nothing
 end
 
 # NoInit: Do nothing, assume initial conditions are correct
