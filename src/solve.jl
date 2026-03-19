@@ -10,6 +10,7 @@ function DiffEqBase.__solve(
             prob.tspan[1] in saveat,
         timeseries_errors = true, dense_errors = false,
         callback = nothing, alias_u0 = false,
+        initializealg = DiffEqBase.DefaultInit(),
         kwargs...
     ) where
     {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
@@ -106,6 +107,14 @@ function DiffEqBase.__solve(
         (t) -> [t], 0, 1, callback_cache, alg, 0.0
     )
     initialize_callbacks!(integrator)
+
+    # DAE initialization - check/compute consistent initial conditions
+    DiffEqBase.initialize_dae!(integrator, initializealg)
+
+    # Check if initialization failed
+    if integrator.sol.retcode == ReturnCode.InitialFailure
+        return integrator.sol
+    end
 
     outputfcn = OutputFunction(integrator)
     o[:OUTPUTFCN] = outputfcn

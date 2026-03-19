@@ -32,6 +32,7 @@ module ODEInterfaceDiffEq
     include("integrator_types.jl")
     include("integrator_utils.jl")
     include("solve.jl")
+    include("initialize.jl")
 
     export ODEInterfaceAlgorithm, dopri5, dop853, odex, seulex, radau, radau5, rodas,
         ddeabm, ddebdf
