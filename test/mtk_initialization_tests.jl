@@ -3,6 +3,7 @@
 
 using ODEInterfaceDiffEq, DiffEqBase, SciMLBase, Test
 using ModelingToolkit
+using NonlinearSolve
 using SymbolicIndexingInterface
 using ModelingToolkit: t_nounits as t, D_nounits as D
 
