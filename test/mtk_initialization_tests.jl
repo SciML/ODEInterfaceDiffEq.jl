@@ -95,8 +95,9 @@ end
 
     # Initial condition: pendulum at angle θ₀ = π/6 from vertical
     θ₀ = π / 6
-    x0 = L * sin(θ₀)
-    y0 = -L * cos(θ₀)
+    L_val = 1.0
+    x0 = L_val * sin(θ₀)
+    y0 = -L_val * cos(θ₀)
 
     prob = ODEProblem(pend, [x => x0, y => y0, vx => 0.0, vy => 0.0], (0.0, 0.5))
 
@@ -104,6 +105,6 @@ end
         sol = solve(prob, alg())
         @test SciMLBase.successful_retcode(sol)
         # Check that the constraint is satisfied throughout
-        @test all(abs.((sol[x] .^ 2 .+ sol[y] .^ 2) .- L^2) .< 1.0e-4)
+        @test all(abs.((sol[x] .^ 2 .+ sol[y] .^ 2) .- L_val^2) .< 1.0e-4)
     end
 end

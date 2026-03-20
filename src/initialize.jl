@@ -150,13 +150,12 @@ function DiffEqBase.initialize_dae!(
         end
     end
 
-    # Update parameters if they changed
+    # Update parameters if they changed (in-place via SciMLStructures)
     if p !== integrator.p
-        # Note: Updating parameters in the integrator for ODEInterface
-        # is tricky because the parameters are captured in the closure.
-        # This is a known limitation - the parameters in the function closure
-        # won't be updated. For full support, the problem would need to be re-created.
-        @warn "OverrideInit updated parameters, but ODEInterface solvers may not reflect parameter changes during integration. Consider re-creating the problem with the new parameters."
+        SS = SciMLBase.SciMLStructures
+        old_vals, _, _ = SS.canonicalize(SS.Tunable(), integrator.p)
+        new_vals, _, _ = SS.canonicalize(SS.Tunable(), p)
+        copyto!(old_vals, new_vals)
     end
 
     integrator.u_modified = true
