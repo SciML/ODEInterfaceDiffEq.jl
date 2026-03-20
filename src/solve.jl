@@ -10,6 +10,7 @@ function DiffEqBase.__solve(
             prob.tspan[1] in saveat,
         timeseries_errors = true, dense_errors = false,
         callback = nothing, alias_u0 = false,
+        initializealg = DiffEqBase.DefaultInit(),
         kwargs...
     ) where
     {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
@@ -107,6 +108,14 @@ function DiffEqBase.__solve(
     )
     initialize_callbacks!(integrator)
 
+    # DAE initialization - check/compute consistent initial conditions
+    DiffEqBase.initialize_dae!(integrator, initializealg)
+
+    # Check if initialization failed
+    if integrator.sol.retcode == ReturnCode.InitialFailure
+        return integrator.sol
+    end
+
     outputfcn = OutputFunction(integrator)
     o[:OUTPUTFCN] = outputfcn
     if !(callbacks_internal.continuous_callbacks isa Tuple{}) || !isempty(saveat)
@@ -141,8 +150,8 @@ function DiffEqBase.__solve(
     end
 
     if !haskey(dict, :MASSMATRIX) && prob.f.mass_matrix != I
-        if prob.f.mass_matrix isa Matrix && isstiff
-            dict[:MASSMATRIX] = prob.f.mass_matrix
+        if prob.f.mass_matrix isa AbstractMatrix && isstiff
+            dict[:MASSMATRIX] = Matrix(prob.f.mass_matrix)
         elseif !isstiff
             error("This solver does not support mass matrices")
         else
