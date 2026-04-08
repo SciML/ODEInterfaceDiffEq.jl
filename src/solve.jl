@@ -15,13 +15,15 @@ function DiffEqBase.__solve(
     ) where
     {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
     tType = eltype(tuptType)
+    verbose_spec = _process_verbose_param(verbose)
 
     isstiff = alg isa ODEInterfaceImplicitAlgorithm
-    if verbose
+    if SciMLLogging.verbosity_to_bool(verbose_spec)
         warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
         if !(prob.f isa DiffEqBase.AbstractParameterizedFunction) && isstiff
             if DiffEqBase.has_tgrad(prob.f)
-                @warn("Explicit t-gradient given to this stiff solver is ignored.")
+                @SciMLMessage("Explicit t-gradient given to this stiff solver is ignored.",
+                    verbose_spec, :mismatched_input_output_type)
                 warned = true
             end
         end
@@ -120,7 +122,8 @@ function DiffEqBase.__solve(
     o[:OUTPUTFCN] = outputfcn
     if !(callbacks_internal.continuous_callbacks isa Tuple{}) || !isempty(saveat)
         if alg isa Union{ddeabm, ddebdf}
-            @warn("saveat and continuous callbacks ignored for ddeabm and ddebdf")
+            @SciMLMessage("saveat and continuous callbacks ignored for ddeabm and ddebdf",
+                verbose_spec, :dense_output_saveat)
             o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_WODENSE
         else
             o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_DENSE
@@ -238,16 +241,16 @@ function DiffEqBase.__solve(
 
     if retcode < 0
         if retcode == -1
-            verbose && @warn("Input is not consistent.")
+            @SciMLMessage("Input is not consistent.", verbose_spec, :inconsistent_input)
             return_retcode = ReturnCode.Failure
         elseif retcode == -2
-            verbose && @warn("Interrupted. Larger maxiters is needed.")
+            @SciMLMessage("Interrupted. Larger maxiters is needed.", verbose_spec, :max_iters)
             return_retcode = ReturnCode.MaxIters
         elseif retcode == -3
-            verbose && @warn("Step size went too small.")
+            @SciMLMessage("Step size went too small.", verbose_spec, :dt_min_unstable)
             return_retcode = ReturnCode.DtLessThanMin
         elseif retcode == -4
-            verbose && @warn("Interrupted. Problem is probably stiff.")
+            @SciMLMessage("Interrupted. Problem is probably stiff.", verbose_spec, :stiff_detection)
             return_retcode = ReturnCode.Unstable
         end
     else
