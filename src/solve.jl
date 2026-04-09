@@ -15,7 +15,7 @@ function DiffEqBase.__solve(
     ) where
     {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
     tType = eltype(tuptType)
-    verbose_spec = _process_verbose_param(verbose)
+    verbose_spec = DiffEqBase._process_verbose_param(verbose)
 
     isstiff = alg isa ODEInterfaceImplicitAlgorithm
     if SciMLLogging.verbosity_to_bool(verbose_spec)
