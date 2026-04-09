@@ -22,8 +22,10 @@ function DiffEqBase.__solve(
         warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
         if !(prob.f isa DiffEqBase.AbstractParameterizedFunction) && isstiff
             if DiffEqBase.has_tgrad(prob.f)
-                @SciMLMessage("Explicit t-gradient given to this stiff solver is ignored.",
-                    verbose_spec, :mismatched_input_output_type)
+                @SciMLMessage(
+                    "Explicit t-gradient given to this stiff solver is ignored.",
+                    verbose_spec, :mismatched_input_output_type
+                )
                 warned = true
             end
         end
@@ -122,8 +124,10 @@ function DiffEqBase.__solve(
     o[:OUTPUTFCN] = outputfcn
     if !(callbacks_internal.continuous_callbacks isa Tuple{}) || !isempty(saveat)
         if alg isa Union{ddeabm, ddebdf}
-            @SciMLMessage("saveat and continuous callbacks ignored for ddeabm and ddebdf",
-                verbose_spec, :dense_output_saveat)
+            @SciMLMessage(
+                "saveat and continuous callbacks ignored for ddeabm and ddebdf",
+                verbose_spec, :dense_output_saveat
+            )
             o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_WODENSE
         else
             o[:OUTPUTMODE] = ODEInterface.OUTPUTFCN_DENSE
