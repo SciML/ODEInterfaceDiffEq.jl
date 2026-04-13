@@ -17,7 +17,7 @@ SciMLLogging = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
 [compat]
 Compat = "2.2, 3.0, 4"
 DataStructures = "0.18, 0.19"
-DiffEqBase = "6.122"
+DiffEqBase = "6.217"
 FunctionWrappers = "1.0"
 ODEInterface = "0.5"
 Reexport = "0.2, 1.0"
