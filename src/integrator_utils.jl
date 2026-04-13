@@ -99,6 +99,18 @@ end
     return integrator.u_modified = bool
 end
 
+# SciMLBase v3 renamed `u_modified!` → `derivative_discontinuity!`. On v3+,
+# also provide the overload under the new name so callers using the new
+# API dispatch correctly for `ODEInterfaceIntegrator` instead of hitting
+# the generic `error(...)` fallback in `SciMLBase.derivative_discontinuity!`.
+@static if isdefined(SciMLBase, :derivative_discontinuity!)
+    @inline function SciMLBase.derivative_discontinuity!(
+            integrator::ODEInterfaceIntegrator, bool::Bool
+        )
+        return integrator.u_modified = bool
+    end
+end
+
 function initialize_callbacks!(integrator, initialize_save = true)
     t = integrator.t
     u = integrator.u
