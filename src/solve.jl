@@ -18,19 +18,17 @@ function DiffEqBase.__solve(
     verbose_spec = DiffEqBase._process_verbose_param(verbose)
 
     isstiff = alg isa ODEInterfaceImplicitAlgorithm
-    if SciMLLogging.verbosity_to_bool(verbose_spec)
-        warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
-        if !(prob.f isa DiffEqBase.AbstractParameterizedFunction) && isstiff
-            if DiffEqBase.has_tgrad(prob.f)
-                @SciMLMessage(
-                    "Explicit t-gradient given to this stiff solver is ignored.",
-                    verbose_spec, :mismatched_input_output_type
-                )
-                warned = true
-            end
+    warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
+    if !(prob.f isa DiffEqBase.AbstractParameterizedFunction) && isstiff
+        if DiffEqBase.has_tgrad(prob.f)
+            @SciMLMessage(
+                "Explicit t-gradient given to this stiff solver is ignored.",
+                verbose_spec, :mismatched_input_output_type
+            )
+            warned = true
         end
-        warned && warn_compat()
     end
+    warned && warn_compat()
 
     callbacks_internal = CallbackSet(callback)
 
