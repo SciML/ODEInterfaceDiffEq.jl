@@ -15,7 +15,7 @@ module ODEInterfaceDiffEq
     using SciMLBase: CallbackSet, ReturnCode, VectorContinuousCallback, check_keywords,
         warn_compat
     using SciMLLogging: SciMLLogging, @SciMLMessage
-    import DiffEqBase: DEVerbosity, DEFAULT_VERBOSE
+    import DiffEqBase: DEFAULT_VERBOSE, DEVerbosity
 
     import DiffEqBase: solve, initialize!, savevalues!
 
