@@ -14,6 +14,8 @@ module ODEInterfaceDiffEq
     using LinearAlgebra: I
     using SciMLBase: CallbackSet, ReturnCode, VectorContinuousCallback, check_keywords,
         warn_compat
+    using SciMLLogging: SciMLLogging, @SciMLMessage
+    import DiffEqBase: DEVerbosity
 
     import DiffEqBase: solve, initialize!, savevalues!
 
