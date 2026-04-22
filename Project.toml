@@ -1,7 +1,7 @@
 name = "ODEInterfaceDiffEq"
 uuid = "09606e27-ecf5-54fc-bb29-004bd9f985bf"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "3.19.0"
+version = "3.20.0"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
@@ -17,7 +17,7 @@ SciMLLogging = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
 [compat]
 Compat = "2.2, 3.0, 4"
 DataStructures = "0.18, 0.19"
-DiffEqBase = "6.217"
+DiffEqBase = "6.217, 7"
 FunctionWrappers = "1.0"
 ODEInterface = "0.5"
 Reexport = "0.2, 1.0"
