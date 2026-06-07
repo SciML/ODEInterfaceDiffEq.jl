@@ -473,7 +473,7 @@ function (f::OutputFunction)(
 
         handle_callbacks!(integrator, eval_sol_fcn)
 
-        if integrator.u_modified
+        if integrator.derivative_discontinuity
             if eltype(integrator.sol.u) <: Vector
                 u .= integrator.u
             else

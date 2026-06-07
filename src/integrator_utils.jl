@@ -42,7 +42,7 @@ function handle_callbacks!(integrator, eval_sol_fcn)
         savevalues!(integrator)
     end
 
-    return integrator.u_modified = continuous_modified || discrete_modified
+    return integrator.derivative_discontinuity = continuous_modified || discrete_modified
 end
 
 function DiffEqBase.savevalues!(
@@ -96,7 +96,7 @@ DiffEqBase.get_tmp_cache(i::ODEInterfaceIntegrator, args...) = nothing
 end
 
 @inline function DiffEqBase.u_modified!(integrator::ODEInterfaceIntegrator, bool::Bool)
-    return integrator.u_modified = bool
+    return integrator.derivative_discontinuity = bool
 end
 
 # SciMLBase v3 renamed `u_modified!` → `derivative_discontinuity!`. On v3+,
@@ -107,7 +107,7 @@ end
     @inline function SciMLBase.derivative_discontinuity!(
             integrator::ODEInterfaceIntegrator, bool::Bool
         )
-        return integrator.u_modified = bool
+        return integrator.derivative_discontinuity = bool
     end
 end
 
@@ -115,7 +115,7 @@ function initialize_callbacks!(integrator, initialize_save = true)
     t = integrator.t
     u = integrator.u
     callbacks = integrator.opts.callback
-    integrator.u_modified = true
+    integrator.derivative_discontinuity = true
 
     u_modified = initialize!(callbacks, u, t, integrator)
 
@@ -131,7 +131,7 @@ function initialize_callbacks!(integrator, initialize_save = true)
     end
 
     # reset this as it is now handled so the integrators should proceed as normal
-    return integrator.u_modified = false
+    return integrator.derivative_discontinuity = false
 end
 
 DiffEqBase.set_proposed_dt!(integrator::ODEInterfaceIntegrator, dt) = nothing

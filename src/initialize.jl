@@ -158,7 +158,7 @@ function DiffEqBase.initialize_dae!(
         copyto!(old_vals, new_vals)
     end
 
-    integrator.u_modified = true
+    integrator.derivative_discontinuity = true
 
     return nothing
 end
