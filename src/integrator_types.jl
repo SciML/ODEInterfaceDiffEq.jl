@@ -17,7 +17,7 @@ mutable struct ODEInterfaceIntegrator{
     tprev::Float64
     p::P
     opts::oType
-    u_modified::Bool
+    derivative_discontinuity::Bool
     tdir::Float64
     sizeu::SType
     sol::solType
