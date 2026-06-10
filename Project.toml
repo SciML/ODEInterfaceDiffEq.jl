@@ -24,6 +24,7 @@ ModelingToolkit = "9, 10, 11"
 NonlinearSolve = "3, 4"
 ODEInterface = "0.5"
 ODEProblemLibrary = "1"
+Pkg = "1"
 Reexport = "1.2.2"
 SciMLBase = "3.1"
 SciMLLogging = "1.10.1, 2"
@@ -36,8 +37,9 @@ ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 ODEProblemLibrary = "fdc4e326-1af4-4b90-96e7-779fcce2daa5"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 SymbolicIndexingInterface = "2efcf032-c050-4f8e-a9bb-153293bab1f5"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["ExplicitImports", "ModelingToolkit", "NonlinearSolve", "SymbolicIndexingInterface", "Test", "ODEProblemLibrary"]
+test = ["ExplicitImports", "ModelingToolkit", "NonlinearSolve", "SymbolicIndexingInterface", "Test", "ODEProblemLibrary", "Pkg"]

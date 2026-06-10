@@ -31,6 +31,9 @@ if GROUP == "All" || GROUP == "Core"
 end
 
 if GROUP == "QA"
+    using Pkg
+    Pkg.activate(joinpath(@__DIR__, "qa"))
+    Pkg.instantiate()
     @time @testset "Quality Assurance" begin
         include(joinpath("qa", "qa.jl"))
     end
