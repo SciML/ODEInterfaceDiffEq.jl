@@ -1,31 +1,31 @@
 using ODEInterfaceDiffEq, DiffEqBase
-using Test
+using SafeTestsets, Test
 
 const GROUP = get(ENV, "GROUP", "All")
 
 if GROUP == "All" || GROUP == "Core"
-    @time @testset "Explicit Imports" begin
+    @time @safetestset "Explicit Imports" begin
         include("explicit_imports.jl")
     end
-    @time @testset "Algorithms" begin
+    @time @safetestset "Algorithms" begin
         include("algorithm_tests.jl")
     end
-    @time @testset "Saving" begin
+    @time @safetestset "Saving" begin
         include("saving_tests.jl")
     end
-    @time @testset "Mass Matrix" begin
+    @time @safetestset "Mass Matrix" begin
         include("mass_matrix_tests.jl")
     end
-    @time @testset "Jacobian Tests" begin
+    @time @safetestset "Jacobian Tests" begin
         include("jac_tests.jl")
     end
-    @time @testset "Callback Tests" begin
+    @time @safetestset "Callback Tests" begin
         include("callbacks.jl")
     end
-    @time @testset "Initialization Tests" begin
+    @time @safetestset "Initialization Tests" begin
         include("initialization_tests.jl")
     end
-    @time @testset "MTK Initialization Tests" begin
+    @time @safetestset "MTK Initialization Tests" begin
         include("mtk_initialization_tests.jl")
     end
 end
