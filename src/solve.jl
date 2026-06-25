@@ -34,6 +34,7 @@ function DiffEqBase.__solve(
 
     max_len_cb = DiffEqBase.max_vector_callback_length(callbacks_internal)
     if max_len_cb isa VectorContinuousCallback
+        uBottomEltype = SciMLBase.recursive_bottom_eltype(prob.u0)
         callback_cache = DiffEqBase.CallbackCache(
             max_len_cb.len, uBottomEltype,
             uBottomEltype
@@ -227,7 +228,7 @@ function DiffEqBase.__solve(
             f!, tspan[1], tspan[2],
             vec(integrator.u), opts
         )
-    elseif alg isa ddebdf
+    else
         tend, uend,
             retcode,
             stats = ODEInterface.ddebdf(
@@ -254,6 +255,8 @@ function DiffEqBase.__solve(
         elseif retcode == -4
             @SciMLMessage("Interrupted. Problem is probably stiff.", verbose_spec, :stiff_detection)
             return_retcode = ReturnCode.Unstable
+        else
+            return_retcode = ReturnCode.Failure
         end
     else
         return_retcode = ReturnCode.Success
