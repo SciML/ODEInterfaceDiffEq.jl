@@ -15,10 +15,4 @@ concurrency:
 jobs:
   tests:
     uses: "SciML/.github/.github/workflows/grouped-tests.yml@v1"
-    with:
-      # ODEInterface 0.4.8 builds the Fortran solvers from source via gfortran
-      # in its deps/build.jl; without it the build errors with
-      # "Currently only gfortran is supported." The jll-based 0.5.x path that
-      # needs no gfortran is unusable until ODEInterface 0.5.1 is registered.
-      apt-packages: "gfortran"
     secrets: "inherit"

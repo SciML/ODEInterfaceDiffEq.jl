@@ -16,8 +16,4 @@ jobs:
     uses: "SciML/.github/.github/workflows/downgrade.yml@v1"
     with:
       mode: "deps"
-      # ODEInterface 0.4.8 compiles its Fortran solvers from source via
-      # gfortran in deps/build.jl; without it the build errors with
-      # "Currently only gfortran is supported."
-      apt-packages: "gfortran"
     secrets: "inherit"
