@@ -1,5 +1,5 @@
-function DiffEqBase.__solve(
-        prob::DiffEqBase.AbstractODEProblem{uType, tuptType, isinplace},
+function SciMLBase.__solve(
+        prob::SciMLBase.AbstractODEProblem{uType, tuptType, isinplace},
         alg::AlgType,
         timeseries = [], ts = [], ks = [];
         saveat = Float64[],
@@ -19,8 +19,8 @@ function DiffEqBase.__solve(
 
     isstiff = alg isa ODEInterfaceImplicitAlgorithm
     warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
-    if !(prob.f isa DiffEqBase.AbstractParameterizedFunction) && isstiff
-        if DiffEqBase.has_tgrad(prob.f)
+    if !(prob.f isa SciMLBase.AbstractParameterizedFunction) && isstiff
+        if SciMLBase.has_tgrad(prob.f)
             @SciMLMessage(
                 "Explicit t-gradient given to this stiff solver is ignored.",
                 verbose_spec, :mismatched_input_output_type
@@ -77,7 +77,7 @@ function DiffEqBase.__solve(
 
     uprev = similar(u)
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, _timeseries,
         timeseries_errors = timeseries_errors,
         calculate_error = false,
@@ -112,7 +112,7 @@ function DiffEqBase.__solve(
     initialize_callbacks!(integrator)
 
     # DAE initialization - check/compute consistent initial conditions
-    DiffEqBase.initialize_dae!(integrator, initializealg)
+    SciMLBase.initialize_dae!(integrator, initializealg)
 
     # Check if initialization failed
     if integrator.sol.retcode == ReturnCode.InitialFailure
@@ -164,7 +164,7 @@ function DiffEqBase.__solve(
             error("This solver must use full or banded mass matrices.")
         end
     end
-    if DiffEqBase.has_jac(prob.f)
+    if SciMLBase.has_jac(prob.f)
         dict[:JACOBIMATRIX] = (t, u, J) -> prob.f.jac(J, u, prob.p, t)
     end
 
@@ -262,8 +262,8 @@ function DiffEqBase.__solve(
         return_retcode = ReturnCode.Success
     end
 
-    if DiffEqBase.has_analytic(prob.f)
-        DiffEqBase.calculate_solution_errors!(
+    if SciMLBase.has_analytic(prob.f)
+        SciMLBase.calculate_solution_errors!(
             integrator.sol;
             timeseries_errors = timeseries_errors,
             dense_errors = dense_errors
@@ -282,7 +282,7 @@ function DiffEqBase.__solve(
     if haskey(stats, "no_lu_decomp")
         destats.nw = stats["no_lu_decomp"]
     end
-    return DiffEqBase.solution_new_retcode(sol, return_retcode)
+    return SciMLBase.solution_new_retcode(sol, return_retcode)
 end
 
 function save_value!(_timeseries, u, ::Type{T}, sizeu) where {T <: Number}
