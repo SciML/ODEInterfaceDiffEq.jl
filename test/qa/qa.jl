@@ -1,14 +1,11 @@
 using SciMLTesting, ODEInterfaceDiffEq, Test
 using JET
 
-# all_qualified_accesses_via_owners: names accessed through DiffEqBase that SciMLBase
-# owns (DiffEqBase reexports them), plus SciMLStructures accessed through SciMLBase, and
-# recursive_bottom_eltype (RecursiveArrayTools-owned, accessed via SciMLBase reexport).
+# all_qualified_accesses_via_owners: names accessed via SciMLBase that SciMLBase does
+# not own. SciMLStructures (the SciMLStructures-owned module) and recursive_bottom_eltype
+# (RecursiveArrayTools-owned) are both reached through the SciMLBase reexport.
 const QUALIFIED_VIA_OWNERS_IGNORE = (
-    :AbstractODEAlgorithm, :AbstractODEIntegrator, :AbstractODEProblem,
-    :AbstractParameterizedFunction, :SciMLStructures, :__solve, :build_solution,
-    :calculate_solution_errors!, :has_analytic, :has_jac, :has_tgrad,
-    :initialize_dae!, :recursive_bottom_eltype, :solution_new_retcode,
+    :SciMLStructures, :recursive_bottom_eltype,
 )
 
 # all_qualified_accesses_are_public: names still non-public in the registered releases.
