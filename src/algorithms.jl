@@ -1,6 +1,6 @@
 # ODEInterface.jl Algorithms
 
-abstract type ODEInterfaceAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
+abstract type ODEInterfaceAlgorithm <: SciMLBase.AbstractODEAlgorithm end
 abstract type ODEInterfaceImplicitAlgorithm <: ODEInterfaceAlgorithm end
 abstract type ODEInterfaceExplicitAlgorithm <: ODEInterfaceAlgorithm end
 """
