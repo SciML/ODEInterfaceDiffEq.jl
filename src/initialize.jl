@@ -11,7 +11,7 @@ export OverrideInit, NoInit, CheckInit, DefaultInit
 # DefaultInit: OverrideInit → CheckInit pattern (matching Sundials v5)
 # First run OverrideInit to compute consistent initial conditions,
 # then run CheckInit to verify the algebraic constraints are satisfied.
-function DiffEqBase.initialize_dae!(
+function SciMLBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
         initializealg::DefaultInit
     )
@@ -19,7 +19,7 @@ function DiffEqBase.initialize_dae!(
 
     # First: OverrideInit to compute consistent initial conditions
     if has_initialization_data(prob.f)
-        DiffEqBase.initialize_dae!(integrator, OverrideInit())
+        SciMLBase.initialize_dae!(integrator, OverrideInit())
 
         # Check if OverrideInit failed
         if integrator.sol.retcode == ReturnCode.InitialFailure
@@ -28,13 +28,13 @@ function DiffEqBase.initialize_dae!(
     end
 
     # Then: CheckInit to verify algebraic constraints are satisfied
-    DiffEqBase.initialize_dae!(integrator, CheckInit())
+    SciMLBase.initialize_dae!(integrator, CheckInit())
 
     return nothing
 end
 
 # NoInit: Do nothing, assume initial conditions are correct
-function DiffEqBase.initialize_dae!(
+function SciMLBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
         initializealg::NoInit
     )
@@ -43,7 +43,7 @@ function DiffEqBase.initialize_dae!(
 end
 
 # CheckInit: Verify that initial conditions satisfy the algebraic constraints
-function DiffEqBase.initialize_dae!(
+function SciMLBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
         initializealg::CheckInit
     )
@@ -69,7 +69,7 @@ function DiffEqBase.initialize_dae!(
     f(tmp, u0, p, t)
 
     # Check residuals of algebraic equations only
-    abstol = integrator.sol.prob isa DiffEqBase.AbstractODEProblem ?
+    abstol = integrator.sol.prob isa SciMLBase.AbstractODEProblem ?
         get(Dict(integrator.opts.callback.discrete_callbacks), :abstol, 1.0e-8) : 1.0e-8
 
     # Try to get abstol from the solve options, fallback to default
@@ -100,7 +100,7 @@ function DiffEqBase.initialize_dae!(
 end
 
 # OverrideInit: Use SciMLBase's initialization system (e.g., from ModelingToolkit)
-function DiffEqBase.initialize_dae!(
+function SciMLBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
         initializealg::OverrideInit
     )
