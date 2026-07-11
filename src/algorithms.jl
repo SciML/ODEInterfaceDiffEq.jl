@@ -1,5 +1,11 @@
 # ODEInterface.jl Algorithms
 
+"""
+    ODEInterfaceAlgorithm
+
+Abstract supertype for ODEInterfaceDiffEq algorithms that wrap the Hairer and
+ODEInterface solvers exposed through the SciML common solve interface.
+"""
 abstract type ODEInterfaceAlgorithm <: SciMLBase.AbstractODEAlgorithm end
 abstract type ODEInterfaceImplicitAlgorithm <: ODEInterfaceAlgorithm end
 abstract type ODEInterfaceExplicitAlgorithm <: ODEInterfaceAlgorithm end
