@@ -24,8 +24,17 @@ const QUALIFIED_ARE_PUBLIC_IGNORE = (
     :rodas, :seulex, :solution_new_retcode,
 )
 
+const API_DOCS_RENDERED_IGNORE = (
+    Tuple(names(ODEInterfaceDiffEq.DiffEqBase))...,
+    :OverrideInit, :NoInit, :CheckInit, :DefaultInit,
+)
+
 run_qa(
     ODEInterfaceDiffEq;
+    api_docs_kwargs = (;
+        rendered = true,
+        rendered_ignore = API_DOCS_RENDERED_IGNORE,
+    ),
     explicit_imports = true,
     ei_kwargs = (;
         all_qualified_accesses_via_owners = (; ignore = QUALIFIED_VIA_OWNERS_IGNORE),
