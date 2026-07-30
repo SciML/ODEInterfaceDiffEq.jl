@@ -2,24 +2,20 @@
 # Following the pattern from Sundials.jl:
 # https://github.com/SciML/Sundials.jl/blob/master/src/common_interface/initialize.jl
 
-import SciMLBase: OverrideInit, NoInit, CheckInit, has_initialization_data
-import DiffEqBase: DefaultInit
-
-# Re-export initialization algorithms (including DefaultInit from DiffEqBase)
-export OverrideInit, NoInit, CheckInit, DefaultInit
+import SciMLBase: has_initialization_data
 
 # DefaultInit: OverrideInit → CheckInit pattern (matching Sundials v5)
 # First run OverrideInit to compute consistent initial conditions,
 # then run CheckInit to verify the algebraic constraints are satisfied.
 function SciMLBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
-        initializealg::DefaultInit
+        initializealg::DiffEqBase.DefaultInit
     )
     prob = integrator.sol.prob
 
     # First: OverrideInit to compute consistent initial conditions
     if has_initialization_data(prob.f)
-        SciMLBase.initialize_dae!(integrator, OverrideInit())
+        SciMLBase.initialize_dae!(integrator, SciMLBase.OverrideInit())
 
         # Check if OverrideInit failed
         if integrator.sol.retcode == ReturnCode.InitialFailure
@@ -28,7 +24,7 @@ function SciMLBase.initialize_dae!(
     end
 
     # Then: CheckInit to verify algebraic constraints are satisfied
-    SciMLBase.initialize_dae!(integrator, CheckInit())
+    SciMLBase.initialize_dae!(integrator, SciMLBase.CheckInit())
 
     return nothing
 end
@@ -36,7 +32,7 @@ end
 # NoInit: Do nothing, assume initial conditions are correct
 function SciMLBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
-        initializealg::NoInit
+        initializealg::SciMLBase.NoInit
     )
     # No-op: initial conditions are assumed to be correct
     return nothing
@@ -45,7 +41,7 @@ end
 # CheckInit: Verify that initial conditions satisfy the algebraic constraints
 function SciMLBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
-        initializealg::CheckInit
+        initializealg::SciMLBase.CheckInit
     )
     prob = integrator.sol.prob
     f = prob.f
@@ -102,7 +98,7 @@ end
 # OverrideInit: Use SciMLBase's initialization system (e.g., from ModelingToolkit)
 function SciMLBase.initialize_dae!(
         integrator::ODEInterfaceIntegrator,
-        initializealg::OverrideInit
+        initializealg::SciMLBase.OverrideInit
     )
     prob = integrator.sol.prob
     f = prob.f
@@ -152,7 +148,7 @@ function SciMLBase.initialize_dae!(
 
     # Update parameters if they changed (in-place via SciMLStructures)
     if p !== integrator.p
-        SS = SciMLBase.SciMLStructures
+        SS = SciMLStructures
         old_vals, _, _ = SS.canonicalize(SS.Tunable(), integrator.p)
         new_vals, _, _ = SS.canonicalize(SS.Tunable(), p)
         copyto!(old_vals, new_vals)

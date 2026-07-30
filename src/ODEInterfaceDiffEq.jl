@@ -2,22 +2,19 @@ __precompile__()
 
 module ODEInterfaceDiffEq
 
-    using Reexport: @reexport
-    @reexport using DiffEqBase
-    using DiffEqBase: DiffEqBase
+    import DiffEqBase
 
     import Compat
     import FunctionWrappers
     import ODEInterface
     import SciMLBase
+    import SciMLStructures
     using DataStructures: BinaryMaxHeap, BinaryMinHeap, counter
     using LinearAlgebra: I
     using SciMLBase: CallbackSet, ReturnCode, VectorContinuousCallback, check_keywords,
         warn_compat
     using SciMLLogging: SciMLLogging, @SciMLMessage
-    import DiffEqBase: DEVerbosity
-
-    import DiffEqBase: solve, initialize!, savevalues!
+    import DiffEqBase: initialize!, savevalues!
 
     const warnkeywords = (
         :save_idxs, :d_discontinuities, :unstable_check, :tstops,

@@ -1,4 +1,4 @@
-using ODEInterfaceDiffEq, Test
+using DiffEqBase, ODEInterfaceDiffEq, Test
 
 callback_f = function (du, u, p, t)
     du[1] = u[2]
@@ -24,3 +24,5 @@ sol = solve(prob, dopri5(), callback = callback, dtmax = 0.5)
 @test sol(4.0)[1] > 0
 sol = solve(prob, dopri5(), callback = callback, save_everystep = true)
 @test sol(4.0)[1] > -1.0e-12
+
+@test_throws ArgumentError solve(prob, dopri5(), verbose = true)
