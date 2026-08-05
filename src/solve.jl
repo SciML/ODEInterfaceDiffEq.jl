@@ -15,7 +15,13 @@ function SciMLBase.__solve(
     ) where
     {uType, tuptType, isinplace, AlgType <: ODEInterfaceAlgorithm}
     tType = eltype(tuptType)
-    verbose_spec = DiffEqBase._process_verbose_param(verbose)
+    verbose_spec = if verbose isa SciMLLogging.AbstractVerbosityPreset
+        DiffEqBase.DEVerbosity(verbose)
+    elseif verbose isa Bool
+        throw(ArgumentError("Passing a `Bool` for `verbose` is no longer supported in OrdinaryDiffEq v7. Use `DEVerbosity()` or a preset like `Standard()`, `None()`, etc. from SciMLLogging."))
+    else
+        verbose
+    end
 
     isstiff = alg isa ODEInterfaceImplicitAlgorithm
     warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
@@ -81,7 +87,7 @@ function SciMLBase.__solve(
         prob, alg, ts, _timeseries,
         timeseries_errors = timeseries_errors,
         calculate_error = false,
-        stats = DiffEqBase.Stats(0),
+        stats = SciMLBase.DEStats(0),
         retcode = ReturnCode.Default
     )
 
