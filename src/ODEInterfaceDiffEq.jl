@@ -33,6 +33,19 @@ module ODEInterfaceDiffEq
     include("solve.jl")
     include("initialize.jl")
 
+    using PrecompileTools: @compile_workload, @setup_workload
+
+    @setup_workload begin
+        @compile_workload begin
+            dopri5()
+            dop853()
+            radau5()
+            rodas()
+            ddeabm()
+            ddebdf()
+        end
+    end
+
     export ODEInterfaceAlgorithm, dopri5, dop853, odex, seulex, radau, radau5, rodas,
         ddeabm, ddebdf
 
