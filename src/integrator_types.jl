@@ -34,6 +34,9 @@ end
         idxs = nothing
     ) where {N}
     @assert N == 0 "ODEInterface does not support dense derivative"
+    if SciMLBase.has_symbolic_idxs(idxs)
+        return SciMLBase.symbolic_interpolation(integrator, t, idxs, deriv)
+    end
     sol = integrator.eval_sol_fcn(t)
-    return idxs == nothing ? sol : sol[idxs]
+    return idxs === nothing ? sol : sol[idxs]
 end
