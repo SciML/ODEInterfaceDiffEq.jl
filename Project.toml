@@ -1,7 +1,7 @@
 name = "ODEInterfaceDiffEq"
 uuid = "09606e27-ecf5-54fc-bb29-004bd9f985bf"
 authors = ["Chris Rackauckas <accounts@chrisrackauckas.com>"]
-version = "5.3.0"
+version = "5.4.0"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
@@ -27,7 +27,7 @@ ODEInterface = "0.5.2"
 PrecompileTools = "1.2"
 ODEProblemLibrary = "1"
 SafeTestsets = "0.1"
-SciMLBase = "3.1"
+SciMLBase = "3.53"
 SciMLLogging = "2"
 SciMLStructures = "1"
 SciMLTesting = "2.4"
