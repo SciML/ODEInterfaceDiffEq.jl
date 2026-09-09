@@ -15,7 +15,8 @@ SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 SciMLLogging = "a6db7da4-7206-11f0-1eab-35f2a5dbe1d1"
 SciMLStructures = "53ae85a6-f571-4167-b2af-e1d143709226"
 
-[compat]
+[compat]Symbolics = "7.39.2"
+
 Compat = "4.15"
 DataStructures = "0.19"
 DiffEqBase = "7"
@@ -36,6 +37,7 @@ Test = "1"
 julia = "1.10"
 
 [extras]
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 ODEProblemLibrary = "fdc4e326-1af4-4b90-96e7-779fcce2daa5"
@@ -45,4 +47,4 @@ SymbolicIndexingInterface = "2efcf032-c050-4f8e-a9bb-153293bab1f5"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["ModelingToolkit", "NonlinearSolve", "SafeTestsets", "SciMLTesting", "SymbolicIndexingInterface", "Test", "ODEProblemLibrary"]
+test = ["Symbolics", "ModelingToolkit", "NonlinearSolve", "SafeTestsets", "SciMLTesting", "SymbolicIndexingInterface", "Test", "ODEProblemLibrary"]
